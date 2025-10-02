@@ -1,0 +1,27 @@
+flutter_native_splash:
+  # LINK - flutter pub run flutter_native_splash:create
+
+  # Background color (set it to a gradient-like purple if desired)
+  color: "#3900B4"
+
+  # PNG image to be displayed in the center
+  image: assets/images/app_logo.png
+
+  # iOS and Android-specific content alignment to ensure logo placement consistency
+  ios_content_mode: scaleAspectFit
+  android_gravity: center
+
+  # Fullscreen splash screen
+  fullscreen: true
+
+  # Dark mode variants
+  color_dark: "#3900B4"
+  image_dark: assets/images/app_logo.png
+
+  # Use custom platform-specific settings if needed
+  android_12:
+    image: assets/images/app_logo.png
+    color: "#3900B4"
+    icon_background_color: "#3900B4"
+
+  # Disable all other features (branding, background image, etc.)

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "210297647236",
+    "project_id": "ahmed-elnemr",
+    "storage_bucket": "ahmed-elnemr.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:210297647236:android:ec0724849cf947205252d1",
+        "android_client_info": {
+          "package_name": "com.example.portofolio_new"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRt2Z1L_rpgL5bwpkSjhom7m6r8v9IjJI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:210297647236:android:34c8eb51033e02135252d1",
+        "android_client_info": {
+          "package_name": "com.example.skin_care"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRt2Z1L_rpgL5bwpkSjhom7m6r8v9IjJI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

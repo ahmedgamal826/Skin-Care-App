@@ -1,0 +1,5 @@
+flutter_application_id:
+  android:
+    name: "Skin Care"
+
+#LINK - flutter pub run flutter_application_id:main -f flutter_application_id.yaml
