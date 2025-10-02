@@ -33,6 +33,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -136,48 +137,72 @@ class _SignInScreenState extends State<SignInScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: PrimaryButton(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          // Instantiate the email authentication method
-                          EmailAuthMethod emailAuthMethod = EmailAuthMethod(
-                            email: _emailController.text.trim(),
-                            password: _passwordController.text,
-                          );
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                              if (_formKey.currentState!.validate()) {
+                                setState(() {
+                                  _isLoading = true;
+                                });
 
-                          AuthService authService = AuthService(
-                            authProvider: FirebaseAuthProvider(
-                              firebaseAuth: FirebaseAuth.instance,
-                            ),
-                          );
+                                try {
+                                  // Instantiate the email authentication method
+                                  EmailAuthMethod emailAuthMethod =
+                                      EmailAuthMethod(
+                                    email: _emailController.text.trim(),
+                                    password: _passwordController.text,
+                                  );
 
-                          try {
-                            AuthModel? authModel =
-                                await authService.signIn(emailAuthMethod);
+                                  AuthService authService = AuthService(
+                                    authProvider: FirebaseAuthProvider(
+                                      firebaseAuth: FirebaseAuth.instance,
+                                    ),
+                                  );
 
-                            if (authModel != null) {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute<void>(
-                                  builder: (BuildContext context) =>
-                                      const HomeScreen(),
-                                ),
-                                (route) => false,
-                              );
-                            } else {
-                              SnackbarHelper.showError(
-                                context,
-                                title: "Invalid email or password",
-                              );
-                            }
-                          } catch (e) {
-                            SnackbarHelper.showError(
-                              context,
-                              title: "Sign in failed: ${e.toString()}",
-                            );
-                          }
-                        }
-                      },
-                      title: "Login",
+                                  AuthModel? authModel =
+                                      await authService.signIn(emailAuthMethod);
+
+                                  if (authModel != null) {
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute<void>(
+                                        builder: (BuildContext context) =>
+                                            const HomeScreen(),
+                                      ),
+                                      (route) => false,
+                                    );
+                                  } else {
+                                    SnackbarHelper.showError(
+                                      context,
+                                      title: "Invalid email or password",
+                                    );
+                                  }
+                                } catch (e) {
+                                  SnackbarHelper.showError(
+                                    context,
+                                    title: "Sign in failed: ${e.toString()}",
+                                  );
+                                } finally {
+                                  if (mounted) {
+                                    setState(() {
+                                      _isLoading = false;
+                                    });
+                                  }
+                                }
+                              }
+                            },
+                      title: _isLoading ? "" : "Login",
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : null,
                     ),
                   ),
                   SizedBox(

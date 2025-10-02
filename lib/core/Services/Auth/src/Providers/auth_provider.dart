@@ -121,10 +121,13 @@ class FirebaseAuthProvider implements AuthProvider {
   @override
   Future<bool> resetPassword(String email) async {
     try {
+      print('🔍 AuthProvider: Sending password reset email to: $email');
       await _firebaseAuth.sendPasswordResetEmail(email: email);
+      print('✅ AuthProvider: Password reset email sent successfully');
       return true;
-    } catch (e) {
-      print('Error during password reset: $e');
+    } catch (e, stackTrace) {
+      print('💥 AuthProvider: Error during password reset: $e');
+      print('📍 AuthProvider: Stack trace: $stackTrace');
     }
     return false;
   }

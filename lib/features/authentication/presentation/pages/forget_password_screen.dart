@@ -16,6 +16,7 @@ class ForgotPasswordScreen extends StatefulWidget {
 class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   final AuthService _authService = AuthService(
     authProvider: FirebaseAuthProvider(
@@ -25,23 +26,42 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   void _resetPassword() async {
     final email = _emailController.text.trim();
+    print('🔄 Reset Password: Starting reset for email: $email');
+
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
       try {
+        print('📧 Reset Password: Calling AuthService.resetPassword...');
         final result = await _authService.resetPassword(email);
+        print('📊 Reset Password: Result: $result');
 
         if (result) {
+          print('✅ Reset Password: Success! Email sent');
           SnackbarHelper.showTemplated(context,
               title:
                   'An email has been sent successfully to reset the password');
           Navigator.pop(context);
         } else {
+          print('❌ Reset Password: Failed to send email');
           SnackbarHelper.showError(context,
               title: "Failed to send an email to reset the password");
         }
       } catch (e) {
+        print('💥 Reset Password: Error occurred: $e');
         SnackbarHelper.showError(context,
             title: "Reset password failed: ${e.toString()}");
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
+    } else {
+      print('❌ Reset Password: Form validation failed');
     }
   }
 
@@ -85,8 +105,18 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         child: SizedBox(
           width: double.infinity,
           child: PrimaryButton(
-            onPressed: _resetPassword,
-            title: 'Reset Password',
+            onPressed: _isLoading ? null : _resetPassword,
+            title: _isLoading ? "" : 'Reset Password',
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : null,
           ),
         ),
       ),

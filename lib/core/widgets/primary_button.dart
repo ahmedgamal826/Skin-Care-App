@@ -4,12 +4,14 @@ class PrimaryButton extends StatelessWidget {
   final String title;
   final VoidCallback? onPressed;
   final Color? color;
+  final Widget? child;
 
   const PrimaryButton({
     super.key,
     required this.title,
     required this.onPressed,
     this.color,
+    this.child,
   });
 
   @override
@@ -27,14 +29,15 @@ class PrimaryButton extends StatelessWidget {
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
-      child: Text(
-        title,
-        style: TextStyle(
-          color: isEnabled
-              ? Theme.of(context).colorScheme.onPrimary
-              : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
-        ),
-      ),
+      child: child ??
+          Text(
+            title,
+            style: TextStyle(
+              color: isEnabled
+                  ? Theme.of(context).colorScheme.onPrimary
+                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            ),
+          ),
     );
   }
 }

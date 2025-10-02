@@ -44,6 +44,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool hasLowerCase = false;
   bool hasNumber = false;
   bool hasSpecialChar = false;
+  bool _isLoading = false;
 
   //t2 --Controllers
   //
@@ -195,8 +196,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your phone number';
                       }
-                      if (!RegExp(r'^05\d{8}$').hasMatch(value)) {
-                        return 'The phone number must start with "05" and be 10 digits long';
+                      // Accept any 11-digit phone number
+                      if (!RegExp(r'^\d{11}$').hasMatch(value)) {
+                        return 'Please enter a valid 11-digit phone number';
                       }
                       return null;
                     },
@@ -207,61 +209,87 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: PrimaryButton(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          AuthService authService = AuthService(
-                            authProvider: FirebaseAuthProvider(
-                              firebaseAuth: FirebaseAuth.instance,
-                            ),
-                          );
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                              if (_formKey.currentState!.validate()) {
+                                setState(() {
+                                  _isLoading = true;
+                                });
 
-                          try {
-                            AuthModel? authModel = await authService.signUp(
-                              _emailController.text.trim(),
-                              _passwordController.text,
-                            );
+                                try {
+                                  AuthService authService = AuthService(
+                                    authProvider: FirebaseAuthProvider(
+                                      firebaseAuth: FirebaseAuth.instance,
+                                    ),
+                                  );
 
-                            if (authModel != null) {
-                              print(
-                                  '🎉 Sign up successful! User ID: ${authModel.uid}');
+                                  AuthModel? authModel =
+                                      await authService.signUp(
+                                    _emailController.text.trim(),
+                                    _passwordController.text,
+                                  );
 
-                              User.UserModel user = User.UserModel(
-                                id: authModel.uid,
-                                email: _emailController.text,
-                                name: _fNameController.text,
-                                phoneNumber: _phoneNumberController.text,
-                              );
+                                  if (authModel != null) {
+                                    print(
+                                        '🎉 Sign up successful! User ID: ${authModel.uid}');
 
-                              print(
-                                  '👤 Creating user document in Firestore...');
-                              String? result = await UserRepo().createSingle(
-                                  'Users', authModel.uid, user.toMap());
+                                    User.UserModel user = User.UserModel(
+                                      id: authModel.uid,
+                                      email: _emailController.text,
+                                      name: _fNameController.text,
+                                      phoneNumber: _phoneNumberController.text,
+                                    );
 
-                              if (result != null) {
-                                print('✅ User document created successfully!');
-                              } else {
-                                print('❌ Failed to create user document');
+                                    print(
+                                        '👤 Creating user document in Firestore...');
+                                    String? result = await UserRepo()
+                                        .createSingle('Users', authModel.uid,
+                                            user.toMap());
+
+                                    if (result != null) {
+                                      print(
+                                          '✅ User document created successfully!');
+                                    } else {
+                                      print('❌ Failed to create user document');
+                                    }
+
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute<void>(
+                                        builder: (BuildContext context) =>
+                                            const QuizScreen(),
+                                      ),
+                                      (route) => false,
+                                    );
+                                  } else {
+                                    SnackbarHelper.showError(context,
+                                        title: 'Failed to sign up');
+                                  }
+                                } catch (e) {
+                                  SnackbarHelper.showError(context,
+                                      title: 'Sign up failed: ${e.toString()}');
+                                } finally {
+                                  if (mounted) {
+                                    setState(() {
+                                      _isLoading = false;
+                                    });
+                                  }
+                                }
                               }
-
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute<void>(
-                                  builder: (BuildContext context) =>
-                                      const QuizScreen(),
-                                ),
-                                (route) => false,
-                              );
-                            } else {
-                              SnackbarHelper.showError(context,
-                                  title: 'Failed to sign up');
-                            }
-                          } catch (e) {
-                            SnackbarHelper.showError(context,
-                                title: 'Sign up failed: ${e.toString()}');
-                          }
-                        }
-                      },
-                      title: "Sign up",
+                            },
+                      title: _isLoading ? "" : "Sign up",
+                      child: _isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : null,
                     ),
                   ),
                   SizedBox(
