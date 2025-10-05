@@ -139,15 +139,21 @@ class _HomeScreenState extends State<HomeScreen> {
               GestureDetector(
                 onTap: () async {
                   final picker = ImagePicker();
-                  final XFile? pickedFile =
-                      await picker.pickImage(source: ImageSource.gallery);
-                  if (pickedFile != null) {
-                    final File image = File(pickedFile.path);
+                  final XFile? pickedFile = await picker.pickImage(
+                    source: ImageSource.gallery,
+                    imageQuality: 92,
+                  );
+                  if (pickedFile == null) return;
+
+                  final File image = File(pickedFile.path);
+
+                  if (context.mounted) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            RecommendedProductsScreen(imageFile: image),
+                        builder: (_) => RecommendedProductsScreen(
+                          imageFile: image,
+                        ),
                       ),
                     );
                   }
@@ -170,64 +176,63 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              Row(
-                children: [
-                  const Text("Language: "),
-                  const SizedBox(width: 12),
-                  DropdownButton<String>(
-                    value: selectedLanguage,
-                    items: ["العربية", "English"]
-                        .map((lang) => DropdownMenuItem(
-                              value: lang,
-                              child: Text(lang),
-                            ))
-                        .toList(),
-                    onChanged: (val) {
-                      setState(() => selectedLanguage = val!);
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: product1Controller,
-                decoration: const InputDecoration(
-                  labelText: 'First Product Name',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: product2Controller,
-                decoration: const InputDecoration(
-                  labelText: 'Second Product Name',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: PrimaryButton(
-                  onPressed: isLoading ? null : checkConflict,
-                  title: isLoading ? "Checking..." : "Check Conflict",
-                ),
-              ),
-              if (responseMessage != null) ...[
-                const SizedBox(height: 16),
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: Text(
-                    responseMessage!,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                )
-              ]
+              // Row(
+              //   children: [
+              //     const Text("Language: "),
+              //     const SizedBox(width: 12),
+              //     DropdownButton<String>(
+              //       value: selectedLanguage,
+              //       items: ["العربية", "English"]
+              //           .map((lang) => DropdownMenuItem(
+              //                 value: lang,
+              //                 child: Text(lang),
+              //               ))
+              //           .toList(),
+              //       onChanged: (val) {
+              //         setState(() => selectedLanguage = val!);
+              //       },
+              //     ),
+              //   ],
+              // ),
+              // const SizedBox(height: 12),
+              // TextField(
+              //   controller: product1Controller,
+              //   decoration: const InputDecoration(
+              //     labelText: 'First Product Name',
+              //     border: OutlineInputBorder(),
+              //   ),
+              // ),
+              // const SizedBox(height: 12),
+              // TextField(
+              //   controller: product2Controller,
+              //   decoration: const InputDecoration(
+              //     labelText: 'Second Product Name',
+              //     border: OutlineInputBorder(),
+              //   ),
+              // ),
+              // const SizedBox(height: 12),
+              // SizedBox(
+              //   width: double.infinity,
+              //   child: PrimaryButton(
+              //     onPressed: isLoading ? null : checkConflict,
+              //     title: isLoading ? "Checking..." : "Check Conflict",
+              //   ),
+              // ),
+              // if (responseMessage != null) ...[
+              //   const SizedBox(height: 16),
+              //   Container(
+              //     width: double.infinity,
+              //     decoration: BoxDecoration(
+              //       color: Colors.white,
+              //       borderRadius: BorderRadius.circular(12),
+              //       border: Border.all(color: Colors.grey.shade300),
+              //     ),
+              //     padding: const EdgeInsets.all(12),
+              //     child: Text(
+              //       responseMessage!,
+              //       style: Theme.of(context).textTheme.bodyLarge,
+              //     ),
+              //   )
             ],
           ),
         ),
