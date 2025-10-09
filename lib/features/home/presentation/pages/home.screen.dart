@@ -175,13 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              // بطاقة كشف سرطان الجلد
-              const DiseaseDetectionCard(
-                title: "كشف سرطان الجلد",
-                subtitle: "فحص الصور للكشف عن مشاكل جلدية محتملة",
-              ),
-              const SizedBox(height: 24),
+             
               // Row(
               //   children: [
               //     const Text("Language: "),

@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class SkinApiClient {
   // بعد ما تعمل adb reverse
-  static const String baseUrl = "http://127.0.0.1:5000";
+  static const String baseUrl = "http://127.0.0.1:5001";
 
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
@@ -12,6 +12,24 @@ class SkinApiClient {
     receiveTimeout: const Duration(seconds: 20),
     headers: {"Accept": "application/json"},
   ));
+
+  /// التحقق من حالة الخادم
+  Future<bool> checkServerStatus() async {
+    try {
+      // استخدام POST /chat مع بيانات فارغة للتحقق من الاتصال
+      final response = await _dio
+          .post('/chat', data: {"session_id": "test", "message": "test"});
+      return response.statusCode == 200;
+    } catch (e) {
+      // إذا فشل /chat، جرب GET / (إذا كان موجود)
+      try {
+        final response = await _dio.get('/');
+        return response.statusCode == 200;
+      } catch (e2) {
+        return false;
+      }
+    }
+  }
 
   /// POST /predict
   Future<({String sessionId, String? userMessage, String response})> analyze({
@@ -27,11 +45,12 @@ class SkinApiClient {
     });
 
     final res = await _dio.post("/predict", data: form);
-    if (res.statusCode == 200 && res.data['success'] == true) {
+    if (res.statusCode == 200) {
       return (
-        sessionId: res.data['session_id'] as String,
+        sessionId: res.data['session_id'] as String? ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
         userMessage: res.data['user_message'] as String?,
-        response: res.data['response'] as String,
+        response: res.data['response'] as String? ?? res.data.toString(),
       );
     }
     throw Exception(res.data?['error'] ?? 'Analyze failed');
@@ -47,8 +66,27 @@ class SkinApiClient {
       "message": message,
     });
 
-    if (res.statusCode == 200 && res.data['success'] == true) {
-      return res.data['response'] as String;
+    if (res.statusCode == 200) {
+      // التحقق من وجود خطأ في الاستجابة
+      if (res.data['error'] != null) {
+        // إرسال خطأ خاص للتعامل مع انتهاء الجلسة
+        if (res.data['error'].toString().contains('Session expired')) {
+          throw Exception('Session expired. Please start a new analysis.');
+        }
+        throw Exception(res.data['error']);
+      }
+
+      // التحقق من وجود response في البيانات
+      if (res.data['response'] != null) {
+        return res.data['response'] as String;
+      } else if (res.data['message'] != null) {
+        return res.data['message'] as String;
+      } else if (res.data['reply'] != null) {
+        return res.data['reply'] as String;
+      } else {
+        // إذا لم نجد response، نعيد البيانات كاملة
+        return res.data.toString();
+      }
     }
     throw Exception(res.data?['error'] ?? 'Chat failed');
   }

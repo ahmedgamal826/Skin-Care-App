@@ -285,7 +285,6 @@ class RecommendedProductsScreen extends StatefulWidget {
 
 class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
     with TickerProviderStateMixin {
-  final _msgCtrl = TextEditingController();
   final _followCtrl = TextEditingController();
   final _scroll = ScrollController();
   final DiseaseDetectionApiService _diseaseApiService =
@@ -296,10 +295,8 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   String? _sessionId;
   bool _loading = false;
   final List<_Bubble> _messages = [];
-  TextDirection _msgTextDirection = TextDirection.ltr;
   TextDirection _followTextDirection = TextDirection.ltr;
   bool _isOnline = false;
-  DiseaseDetectionResult? _detectionResult;
 
   late AnimationController _fadeController;
   late AnimationController _slideController;
@@ -337,26 +334,25 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   Future<void> _analyze() async {
     setState(() => _loading = true);
     try {
-      // استخدام SkinApiClient للتحليل مع Gemini
-      final result = await _skinApiClient.analyze(
-        imageFile: _image,
-        message: _msgCtrl.text.trim().isNotEmpty ? _msgCtrl.text.trim() : null,
-      );
+      // أولاً: تحليل الصورة باستخدام DiseaseDetectionApiService للحصول على معلومات المرض
+      final xFile = XFile(_image.path);
+      final diseaseResult =
+          await _diseaseApiService.detectSkinDisease(imageFile: xFile);
 
-      // حفظ session ID ونتائج التحليل
+      // تم تحليل المرض بنجاح
+
+      // استخدام session ID من API أو إنشاء واحد جديد
+      _sessionId = DateTime.now().millisecondsSinceEpoch.toString();
+
+      // لا توجد رسالة مستخدم في هذا الوضع
+
+      // إنشاء رسالة AI بناءً على نتائج تحليل المرض
+      String aiResponse = _createDiseaseResponse(diseaseResult);
+      _messages.add(_Bubble(isUser: false, text: aiResponse));
+
       setState(() {
-        _sessionId = result.sessionId;
         _isOnline = true;
       });
-
-      // إضافة رسالة المستخدم إذا كان هناك نص
-      if (result.userMessage != null && result.userMessage!.isNotEmpty) {
-        _messages.add(_Bubble(isUser: true, text: result.userMessage!));
-      }
-
-      // إضافة رد AI من Gemini
-      _messages.add(_Bubble(isUser: false, text: result.response));
-
       _scrollToBottom();
     } catch (e) {
       setState(() {
@@ -368,15 +364,11 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
     }
   }
 
-  String _generateAIResponse() {
-    return "Based on the analysis of your skin image, I can provide you with detailed recommendations for your skin condition.\n\n**Condition:** Healthy Skin\n**Confidence Level:** 85.5%";
-  }
-
-  String _generateAIResponseFromResult(DiseaseDetectionResult result) {
-    if (result.isSuccessful) {
-      return "Based on the analysis of your skin image, I can provide you with detailed recommendations for your skin condition.\n\n**Condition:** ${result.diseaseNameEnglish}\n**Confidence Level:** ${result.confidencePercentage}%";
+  String _createDiseaseResponse(DiseaseDetectionResult diseaseResult) {
+    if (diseaseResult.isSuccessful) {
+      return "Based on the analysis of your skin image, I can provide you with detailed recommendations for your skin condition.\n\n**Disease Name:** ${diseaseResult.diseaseNameEnglish}\n\n**Confidence Level:** ${diseaseResult.confidencePercentage}%";
     } else {
-      return "Based on the analysis of your skin image, I can provide you with detailed recommendations for your skin condition.\n\n**Condition:** Analysis Failed\n**Confidence Level:** N/A";
+      return "Based on the analysis of your skin image, I can provide you with detailed recommendations for your skin condition.\n\n**Disease Name:** Analysis Failed\n\n**Confidence Level:** N/A";
     }
   }
 
@@ -388,38 +380,64 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
     setState(() => _loading = true);
     _scrollToBottom();
 
-    // محاكاة استجابة AI
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // استخدام SkinApiClient للـ follow-up مع Gemini
+      final aiReply = await _skinApiClient.followUp(
+        sessionId: _sessionId!,
+        message: q,
+      );
 
-    String aiReply = _generateFollowUpResponse(q);
-    _messages.add(_Bubble(isUser: false, text: aiReply));
-    setState(() {
-      _isOnline = true;
-    });
-    _scrollToBottom();
-    setState(() => _loading = false);
+      _messages.add(_Bubble(isUser: false, text: aiReply));
+      setState(() {
+        _isOnline = true;
+      });
+      _scrollToBottom();
+    } catch (e) {
+      // في حالة فشل Gemini، إظهار رسالة خطأ مع الاحتفاظ برسالة المستخدم
+      setState(() {
+        _isOnline = false;
+      });
+
+      String errorMessage = e.toString();
+      if (errorMessage.contains('Session expired')) {
+        // إعادة تحليل الصورة تلقائياً بدون رسالة
+        await _reanalyzeAndRespond(q);
+      } else {
+        _snack("خطأ في الاتصال: $errorMessage");
+      }
+    } finally {
+      setState(() => _loading = false);
+    }
   }
 
-  String _generateFollowUpResponse(String question) {
-    String lowerQuestion = question.toLowerCase();
+  /// إعادة تحليل الصورة والرد على الرسالة
+  Future<void> _reanalyzeAndRespond(String message) async {
+    try {
+      setState(() => _loading = true);
 
-    // استخدام معلومات المرض الحقيقي إذا كانت متوفرة
-    String diseaseName =
-        _detectionResult?.diseaseNameEnglish ?? "your skin condition";
+      // إعادة تحليل الصورة باستخدام SkinApiClient للحصول على session_id صحيح
+      final analysisResult = await _skinApiClient.analyze(
+        imageFile: File(_image.path),
+        message: message,
+      );
 
-    if (lowerQuestion.contains('treatment') || lowerQuestion.contains('علاج')) {
-      return "For $diseaseName, I recommend:\n\n• Consult a dermatologist for professional treatment\n• Use gentle, fragrance-free skincare products\n• Apply sunscreen daily (SPF 30+)\n• Monitor the area for any changes\n• Follow your doctor's specific recommendations";
-    } else if (lowerQuestion.contains('prevention') ||
-        lowerQuestion.contains('وقاية')) {
-      return "To prevent skin issues:\n\n• Use broad-spectrum sunscreen daily\n• Avoid excessive sun exposure\n• Don't smoke\n• Eat a healthy diet rich in antioxidants\n• Stay hydrated\n• Get regular skin checkups";
-    } else if (lowerQuestion.contains('symptoms') ||
-        lowerQuestion.contains('أعراض')) {
-      return "Common symptoms to watch for:\n\n• Changes in size, shape, or color\n• Irregular borders\n• Asymmetrical appearance\n• Diameter larger than 6mm\n• Evolution or changes over time\n• Any bleeding or itching";
-    } else if (lowerQuestion.contains('serious') ||
-        lowerQuestion.contains('خطير')) {
-      return "While $diseaseName should be monitored, it's important to:\n\n• See a dermatologist for proper evaluation\n• Don't self-diagnose\n• Follow medical advice\n• Keep regular appointments\n• Report any concerning changes immediately";
-    } else {
-      return "Thank you for your question about $diseaseName. For the most accurate and personalized advice, I recommend consulting with a dermatologist who can examine your specific case and provide tailored recommendations based on your medical history and current condition.";
+      // استخدام session_id من الـ API
+      _sessionId = analysisResult.sessionId;
+
+      // لا نحتاج لإضافة رسالة المستخدم مرة أخرى لأنها موجودة بالفعل
+      // إضافة رد الـ API فقط
+      _messages.add(_Bubble(isUser: false, text: analysisResult.response));
+
+      setState(() {
+        _isOnline = true;
+      });
+      _scrollToBottom();
+
+      // تم إعادة التحليل بنجاح بدون رسالة
+    } catch (e) {
+      _snack("فشل في إعادة التحليل: ${e.toString()}");
+    } finally {
+      setState(() => _loading = false);
     }
   }
 
@@ -435,12 +453,35 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
     });
   }
 
+  /// تنظيف النص وإزالة النجوم وتحسين المظهر
+  String _cleanText(String text) {
+    // إزالة النجوم من النص
+    String cleanedText = text.replaceAll('**', '');
+
+    // تحسين المسافات ولكن الحفاظ على الأسطر الجديدة
+    cleanedText = cleanedText.replaceAll(RegExp(r'[ \t]+'), ' ').trim();
+
+    // إضافة مسافات بعد النقطتين
+    cleanedText = cleanedText.replaceAll(':', ': ');
+
+    return cleanedText;
+  }
+
   Future<void> _checkConnectionStatus() async {
-    // تعيين حالة الاتصال كـ online لأننا نستخدم النظام المحلي
-    if (mounted) {
-      setState(() {
-        _isOnline = true;
-      });
+    // التحقق من حالة الخادم باستخدام SkinApiClient (المنفذ 5001)
+    try {
+      final isServerOnline = await _skinApiClient.checkServerStatus();
+      if (mounted) {
+        setState(() {
+          _isOnline = isServerOnline;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isOnline = false;
+        });
+      }
     }
   }
 
@@ -600,61 +641,6 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                   // ),
                 ],
               ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
-
-          // Note input field with enhanced styling
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.95),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: TextField(
-              controller: _msgCtrl,
-              textDirection: _msgTextDirection,
-              textAlign: _msgTextDirection == TextDirection.rtl
-                  ? TextAlign.right
-                  : TextAlign.left,
-              onChanged: (value) {
-                if (value.isNotEmpty) {
-                  final isArabic = RegExp(r'[\u0600-\u06FF]').hasMatch(value);
-                  setState(() {
-                    _msgTextDirection =
-                        isArabic ? TextDirection.rtl : TextDirection.ltr;
-                  });
-                }
-              },
-              decoration: InputDecoration(
-                hintText: "Optional: add a note or question",
-                hintStyle: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 14,
-                ),
-                filled: true,
-                fillColor: Colors.transparent,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.all(16),
-                prefixIcon: Icon(
-                  Icons.edit_note_outlined,
-                  color: Colors.grey.shade600,
-                  size: 20,
-                ),
-              ),
-              minLines: 1,
-              maxLines: 3,
-              style: const TextStyle(fontSize: 14),
             ),
           ),
 
@@ -863,14 +849,15 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                                   left: m.isUser ? 0 : 8,
                                   right: m.isUser ? 8 : 0,
                                 ),
-                                child: Text(
-                                  m.text,
+                                child: SelectableText(
+                                  _cleanText(m.text),
                                   style: TextStyle(
                                     color: m.isUser
                                         ? Colors.white
                                         : Colors.black87,
                                     height: 1.5,
                                     fontSize: 14,
+                                    fontWeight: FontWeight.w400,
                                   ),
                                 ),
                               ),
@@ -1065,7 +1052,6 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
 
   @override
   void dispose() {
-    _msgCtrl.dispose();
     _followCtrl.dispose();
     _scroll.dispose();
     _fadeController.dispose();
