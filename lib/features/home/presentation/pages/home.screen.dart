@@ -7,8 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 import '../../../../Data/Model/User/user.model.dart';
-import '../../../../core/widgets/primary_button.dart';
 import '../../../profile/presentation/pages/profile.screen.dart';
+import '../widgets/disease_detection_card.dart';
 import 'recommended_products_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -151,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => RecommendedProductsScreen(
+                        builder: (context) => RecommendedProductsScreen(
                           imageFile: image,
                         ),
                       ),
@@ -174,6 +174,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
+              ),
+              const SizedBox(height: 16),
+              // بطاقة كشف سرطان الجلد
+              const DiseaseDetectionCard(
+                title: "كشف سرطان الجلد",
+                subtitle: "فحص الصور للكشف عن مشاكل جلدية محتملة",
               ),
               const SizedBox(height: 24),
               // Row(

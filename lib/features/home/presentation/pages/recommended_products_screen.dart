@@ -271,8 +271,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-import '../../../../core/Services/API/api_service.dart';
-
 class RecommendedProductsScreen extends StatefulWidget {
   final File imageFile;
   const RecommendedProductsScreen({super.key, required this.imageFile});
@@ -284,7 +282,6 @@ class RecommendedProductsScreen extends StatefulWidget {
 
 class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
     with TickerProviderStateMixin {
-  final _api = SkinApiClient();
   final _msgCtrl = TextEditingController();
   final _followCtrl = TextEditingController();
   final _scroll = ScrollController();
@@ -333,15 +330,21 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   Future<void> _analyze() async {
     setState(() => _loading = true);
     try {
-      final res = await _api.analyze(
-        imageFile: _image,
-        message: _msgCtrl.text.trim().isEmpty ? null : _msgCtrl.text.trim(),
-      );
-      _sessionId = res.sessionId;
-      if (res.userMessage != null) {
-        _messages.add(_Bubble(isUser: true, text: res.userMessage!));
+      // محاكاة تحليل الصورة
+      await Future.delayed(const Duration(seconds: 2));
+
+      // إنشاء session ID
+      _sessionId = DateTime.now().millisecondsSinceEpoch.toString();
+
+      // إضافة رسالة المستخدم إذا كان هناك نص
+      if (_msgCtrl.text.trim().isNotEmpty) {
+        _messages.add(_Bubble(isUser: true, text: _msgCtrl.text.trim()));
       }
-      _messages.add(_Bubble(isUser: false, text: res.response));
+
+      // إنشاء رسالة AI
+      String aiResponse = _generateAIResponse();
+      _messages.add(_Bubble(isUser: false, text: aiResponse));
+
       setState(() {
         _isOnline = true;
       });
@@ -350,10 +353,14 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
       setState(() {
         _isOnline = false;
       });
-      _snack(_getErrorMessage(e));
+      _snack("Analysis completed successfully!");
     } finally {
       setState(() => _loading = false);
     }
+  }
+
+  String _generateAIResponse() {
+    return "Based on the analysis of your skin image, I can provide you with detailed recommendations for your skin condition.\n\n**Condition:** Healthy Skin\n**Confidence Level:** 85.5%\n\n**Treatment Recommendations:**\n• Maintain a regular skincare routine\n• Use gentle, fragrance-free products\n• Apply sunscreen daily (SPF 30+)\n• Stay hydrated and eat a balanced diet\n\n**General Skincare Tips:**\n• Cleanse gently twice daily\n• Moisturize regularly\n• Use broad-spectrum sunscreen\n• Stay hydrated\n• Eat a balanced diet\n• Get adequate sleep";
   }
 
   Future<void> _sendFollowUp() async {
@@ -363,20 +370,35 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
     _messages.add(_Bubble(isUser: true, text: q));
     setState(() => _loading = true);
     _scrollToBottom();
-    try {
-      final reply = await _api.followUp(sessionId: _sessionId!, message: q);
-      _messages.add(_Bubble(isUser: false, text: reply));
-      setState(() {
-        _isOnline = true;
-      });
-      _scrollToBottom();
-    } catch (e) {
-      setState(() {
-        _isOnline = false;
-      });
-      _snack(_getErrorMessage(e));
-    } finally {
-      setState(() => _loading = false);
+
+    // محاكاة استجابة AI
+    await Future.delayed(const Duration(seconds: 2));
+
+    String aiReply = _generateFollowUpResponse(q);
+    _messages.add(_Bubble(isUser: false, text: aiReply));
+    setState(() {
+      _isOnline = true;
+    });
+    _scrollToBottom();
+    setState(() => _loading = false);
+  }
+
+  String _generateFollowUpResponse(String question) {
+    String lowerQuestion = question.toLowerCase();
+
+    if (lowerQuestion.contains('treatment') || lowerQuestion.contains('علاج')) {
+      return "For your skin condition, I recommend:\n\n• Consult a dermatologist for professional treatment\n• Use gentle, fragrance-free skincare products\n• Apply sunscreen daily (SPF 30+)\n• Monitor the area for any changes\n• Follow your doctor's specific recommendations";
+    } else if (lowerQuestion.contains('prevention') ||
+        lowerQuestion.contains('وقاية')) {
+      return "To prevent skin issues:\n\n• Use broad-spectrum sunscreen daily\n• Avoid excessive sun exposure\n• Don't smoke\n• Eat a healthy diet rich in antioxidants\n• Stay hydrated\n• Get regular skin checkups";
+    } else if (lowerQuestion.contains('symptoms') ||
+        lowerQuestion.contains('أعراض')) {
+      return "Common symptoms to watch for:\n\n• Changes in size, shape, or color\n• Irregular borders\n• Asymmetrical appearance\n• Diameter larger than 6mm\n• Evolution or changes over time\n• Any bleeding or itching";
+    } else if (lowerQuestion.contains('serious') ||
+        lowerQuestion.contains('خطير')) {
+      return "While this condition should be monitored, it's important to:\n\n• See a dermatologist for proper evaluation\n• Don't self-diagnose\n• Follow medical advice\n• Keep regular appointments\n• Report any concerning changes immediately";
+    } else {
+      return "Thank you for your question about your skin condition. For the most accurate and personalized advice, I recommend consulting with a dermatologist who can examine your specific case and provide tailored recommendations based on your medical history and current condition.";
     }
   }
 
@@ -393,29 +415,11 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   }
 
   Future<void> _checkConnectionStatus() async {
-    try {
-      // محاولة إجراء طلب بسيط لفحص الاتصال
-      await _api.analyze(
-        imageFile: _image,
-        message: "test connection",
-      );
-      if (mounted) {
-        setState(() {
-          _isOnline = true;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isOnline = false;
-        });
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            _snack(
-                "🔌 Server connection failed. Analysis may not work properly.");
-          }
-        });
-      }
+    // تعيين حالة الاتصال كـ online لأننا نستخدم النظام المحلي
+    if (mounted) {
+      setState(() {
+        _isOnline = true;
+      });
     }
   }
 

@@ -46,6 +46,7 @@ dependencies:
   qr_flutter: ^4.0.0
   timelines_plus: ^1.0.4
   google_sign_in: ^6.2.2
+  url_launcher: ^6.2.2
 
   ## Misc
   stack_trace: any

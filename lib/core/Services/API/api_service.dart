@@ -1,48 +1,6 @@
-// import 'dart:convert';
-
-// import 'package:http/http.dart';
-
-// class ApiHandler {
-//   final String baseUrl;
-//   final Map<String, String> defaultHeaders;
-
-//   ApiHandler(
-//       {required this.baseUrl,
-//       this.defaultHeaders = const {'Content-Type': 'application/json'}});
-
-//   Future<dynamic> postRequest(String endpoint,
-//       {Map<String, dynamic>? body}) async {
-//     final response = await post(
-//       Uri.parse('$baseUrl$endpoint'),
-//       headers: defaultHeaders,
-//       body: body != null ? jsonEncode(body) : null,
-//     );
-
-//     if (response.statusCode == 200) {
-//       return jsonDecode(response.body);
-//     } else {
-//       throw Exception('Failed to load data');
-//     }
-//   }
-
-//   Future<List<T>> getList<T>(String endpoint,
-//       {Map<String, dynamic>? body,
-//       required T Function(Map<String, dynamic>) fromJson}) async {
-//     final data = await postRequest(endpoint, body: body);
-//     List<dynamic> dataList = data['results'];
-//     return dataList.map<T>((item) => fromJson(item)).toList();
-//   }
-// }
-
-// // Example usage
-// // SleepQuality sleepQuality = await apiHandler.getSingle(
-// // '/getSleepQuality',
-// // body: {'userId': 'user123'},
-// // fromJson: (json) => SleepQuality.fromJson(json),
-// // );
-
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SkinApiClient {
   // بعد ما تعمل adb reverse
@@ -93,5 +51,20 @@ class SkinApiClient {
       return res.data['response'] as String;
     }
     throw Exception(res.data?['error'] ?? 'Chat failed');
+  }
+
+  /// فتح Gemini Chat مع اسم المرض
+  static Future<void> launchGeminiChat(String diseaseName) async {
+    final geminiUrl = 'https://gemini.google.com/app';
+    final prompt =
+        "What creams and treatments should I use for $diseaseName? Please provide detailed skincare recommendations.";
+    final encodedPrompt = Uri.encodeComponent(prompt);
+    final fullUrl = '$geminiUrl?prompt=$encodedPrompt';
+
+    try {
+      await launchUrl(Uri.parse(fullUrl), mode: LaunchMode.externalApplication);
+    } catch (e) {
+      throw Exception('Failed to open Gemini: $e');
+    }
   }
 }
