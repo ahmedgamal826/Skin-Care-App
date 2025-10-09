@@ -270,6 +270,8 @@
 // lib/skin_screen.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../../core/Services/API/api_services_disease.dart';
 
 class RecommendedProductsScreen extends StatefulWidget {
   final File imageFile;
@@ -285,6 +287,8 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   final _msgCtrl = TextEditingController();
   final _followCtrl = TextEditingController();
   final _scroll = ScrollController();
+  final DiseaseDetectionApiService _diseaseApiService =
+      DiseaseDetectionApiService();
 
   late File _image;
   String? _sessionId;
@@ -293,6 +297,7 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   TextDirection _msgTextDirection = TextDirection.ltr;
   TextDirection _followTextDirection = TextDirection.ltr;
   bool _isOnline = false;
+  DiseaseDetectionResult? _detectionResult;
 
   late AnimationController _fadeController;
   late AnimationController _slideController;
@@ -330,8 +335,15 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   Future<void> _analyze() async {
     setState(() => _loading = true);
     try {
-      // محاكاة تحليل الصورة
-      await Future.delayed(const Duration(seconds: 2));
+      // تحليل الصورة باستخدام api_services_disease
+      final xFile = XFile(_image.path);
+      final result =
+          await _diseaseApiService.detectSkinDisease(imageFile: xFile);
+
+      // حفظ نتائج التحليل
+      setState(() {
+        _detectionResult = result;
+      });
 
       // إنشاء session ID
       _sessionId = DateTime.now().millisecondsSinceEpoch.toString();
@@ -341,8 +353,8 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
         _messages.add(_Bubble(isUser: true, text: _msgCtrl.text.trim()));
       }
 
-      // إنشاء رسالة AI
-      String aiResponse = _generateAIResponse();
+      // إنشاء رسالة AI بناءً على نتائج التحليل الفعلية
+      String aiResponse = _generateAIResponseFromResult(result);
       _messages.add(_Bubble(isUser: false, text: aiResponse));
 
       setState(() {
@@ -360,7 +372,15 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   }
 
   String _generateAIResponse() {
-    return "Based on the analysis of your skin image, I can provide you with detailed recommendations for your skin condition.\n\n**Condition:** Healthy Skin\n**Confidence Level:** 85.5%\n\n**Treatment Recommendations:**\n• Maintain a regular skincare routine\n• Use gentle, fragrance-free products\n• Apply sunscreen daily (SPF 30+)\n• Stay hydrated and eat a balanced diet\n\n**General Skincare Tips:**\n• Cleanse gently twice daily\n• Moisturize regularly\n• Use broad-spectrum sunscreen\n• Stay hydrated\n• Eat a balanced diet\n• Get adequate sleep";
+    return "Based on the analysis of your skin image, I can provide you with detailed recommendations for your skin condition.\n\n**Condition:** Healthy Skin\n**Confidence Level:** 85.5%";
+  }
+
+  String _generateAIResponseFromResult(DiseaseDetectionResult result) {
+    if (result.isSuccessful) {
+      return "Based on the analysis of your skin image, I can provide you with detailed recommendations for your skin condition.\n\n**Condition:** ${result.diseaseNameEnglish}\n**Confidence Level:** ${result.confidencePercentage}%";
+    } else {
+      return "Based on the analysis of your skin image, I can provide you with detailed recommendations for your skin condition.\n\n**Condition:** Analysis Failed\n**Confidence Level:** N/A";
+    }
   }
 
   Future<void> _sendFollowUp() async {
@@ -386,8 +406,12 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   String _generateFollowUpResponse(String question) {
     String lowerQuestion = question.toLowerCase();
 
+    // استخدام معلومات المرض الحقيقي إذا كانت متوفرة
+    String diseaseName =
+        _detectionResult?.diseaseNameEnglish ?? "your skin condition";
+
     if (lowerQuestion.contains('treatment') || lowerQuestion.contains('علاج')) {
-      return "For your skin condition, I recommend:\n\n• Consult a dermatologist for professional treatment\n• Use gentle, fragrance-free skincare products\n• Apply sunscreen daily (SPF 30+)\n• Monitor the area for any changes\n• Follow your doctor's specific recommendations";
+      return "For $diseaseName, I recommend:\n\n• Consult a dermatologist for professional treatment\n• Use gentle, fragrance-free skincare products\n• Apply sunscreen daily (SPF 30+)\n• Monitor the area for any changes\n• Follow your doctor's specific recommendations";
     } else if (lowerQuestion.contains('prevention') ||
         lowerQuestion.contains('وقاية')) {
       return "To prevent skin issues:\n\n• Use broad-spectrum sunscreen daily\n• Avoid excessive sun exposure\n• Don't smoke\n• Eat a healthy diet rich in antioxidants\n• Stay hydrated\n• Get regular skin checkups";
@@ -396,9 +420,9 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
       return "Common symptoms to watch for:\n\n• Changes in size, shape, or color\n• Irregular borders\n• Asymmetrical appearance\n• Diameter larger than 6mm\n• Evolution or changes over time\n• Any bleeding or itching";
     } else if (lowerQuestion.contains('serious') ||
         lowerQuestion.contains('خطير')) {
-      return "While this condition should be monitored, it's important to:\n\n• See a dermatologist for proper evaluation\n• Don't self-diagnose\n• Follow medical advice\n• Keep regular appointments\n• Report any concerning changes immediately";
+      return "While $diseaseName should be monitored, it's important to:\n\n• See a dermatologist for proper evaluation\n• Don't self-diagnose\n• Follow medical advice\n• Keep regular appointments\n• Report any concerning changes immediately";
     } else {
-      return "Thank you for your question about your skin condition. For the most accurate and personalized advice, I recommend consulting with a dermatologist who can examine your specific case and provide tailored recommendations based on your medical history and current condition.";
+      return "Thank you for your question about $diseaseName. For the most accurate and personalized advice, I recommend consulting with a dermatologist who can examine your specific case and provide tailored recommendations based on your medical history and current condition.";
     }
   }
 
