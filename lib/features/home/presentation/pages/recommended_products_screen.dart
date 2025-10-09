@@ -272,6 +272,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/Services/API/api_services_disease.dart';
+import '../../../../core/Services/API/api_service.dart';
 
 class RecommendedProductsScreen extends StatefulWidget {
   final File imageFile;
@@ -289,6 +290,7 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   final _scroll = ScrollController();
   final DiseaseDetectionApiService _diseaseApiService =
       DiseaseDetectionApiService();
+  final SkinApiClient _skinApiClient = SkinApiClient();
 
   late File _image;
   String? _sessionId;
@@ -335,37 +337,32 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   Future<void> _analyze() async {
     setState(() => _loading = true);
     try {
-      // تحليل الصورة باستخدام api_services_disease
-      final xFile = XFile(_image.path);
-      final result =
-          await _diseaseApiService.detectSkinDisease(imageFile: xFile);
+      // استخدام SkinApiClient للتحليل مع Gemini
+      final result = await _skinApiClient.analyze(
+        imageFile: _image,
+        message: _msgCtrl.text.trim().isNotEmpty ? _msgCtrl.text.trim() : null,
+      );
 
-      // حفظ نتائج التحليل
+      // حفظ session ID ونتائج التحليل
       setState(() {
-        _detectionResult = result;
-      });
-
-      // إنشاء session ID
-      _sessionId = DateTime.now().millisecondsSinceEpoch.toString();
-
-      // إضافة رسالة المستخدم إذا كان هناك نص
-      if (_msgCtrl.text.trim().isNotEmpty) {
-        _messages.add(_Bubble(isUser: true, text: _msgCtrl.text.trim()));
-      }
-
-      // إنشاء رسالة AI بناءً على نتائج التحليل الفعلية
-      String aiResponse = _generateAIResponseFromResult(result);
-      _messages.add(_Bubble(isUser: false, text: aiResponse));
-
-      setState(() {
+        _sessionId = result.sessionId;
         _isOnline = true;
       });
+
+      // إضافة رسالة المستخدم إذا كان هناك نص
+      if (result.userMessage != null && result.userMessage!.isNotEmpty) {
+        _messages.add(_Bubble(isUser: true, text: result.userMessage!));
+      }
+
+      // إضافة رد AI من Gemini
+      _messages.add(_Bubble(isUser: false, text: result.response));
+
       _scrollToBottom();
     } catch (e) {
       setState(() {
         _isOnline = false;
       });
-      _snack("Analysis completed successfully!");
+      _snack("فشل في التحليل: ${e.toString()}");
     } finally {
       setState(() => _loading = false);
     }
