@@ -1,15 +1,13 @@
-// Modified HomeScreen with language selection for ChatGPT prompt
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/foundation.dart';
 import '../../../../Data/Model/User/user.model.dart';
+import '../../../../core/Services/API/skin_care_api_service.dart';
 import '../../../profile/presentation/pages/profile.screen.dart';
-import '../widgets/disease_detection_card.dart';
-import 'recommended_products_screen.dart';
+import '../../../skin_analysis/presentation/pages/skin_analysis_result_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,11 +20,204 @@ class _HomeScreenState extends State<HomeScreen> {
   UserModel? appUser;
   bool isLoading = false;
   String? userId;
+  bool serverConnected = false;
 
   final TextEditingController product1Controller = TextEditingController();
   final TextEditingController product2Controller = TextEditingController();
   String? responseMessage;
-  String selectedLanguage = 'العربية';
+  String selectedLanguage = 'English';
+
+  // إضافة الخدمة الجديدة
+  final SkinCareApiService _skinCareApiService = SkinCareApiService();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkServerStatus();
+  }
+
+  /// Check server status
+  Future<void> _checkServerStatus() async {
+    try {
+      final isConnected = await _skinCareApiService.checkServerStatus();
+      setState(() {
+        serverConnected = isConnected;
+      });
+    } catch (e) {
+      setState(() {
+        serverConnected = false;
+      });
+    }
+  }
+
+  /// Analyze skin using the new service and navigate to result screen
+  Future<void> _analyzeSkinWithNewService(XFile imageFile) async {
+    if (!mounted) return;
+    
+    // Navigate to the new result screen which will handle analysis
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SkinAnalysisResultScreen(
+          imageFile: imageFile,
+        ),
+      ),
+    );
+  }
+
+  /// Show analysis results
+  void _showAnalysisResults(CompleteAnalysisResult result) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Skin Analysis Results'),
+        content: SizedBox(
+          width: double.maxFinite,
+          height: 500,
+          child: Column(
+            children: [
+              // Analysis information
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Skin Type: ${result.skinType}'),
+                      Text('Concern: ${result.concern}'),
+                      const SizedBox(height: 8),
+                      Text(
+                          'Skin Type Confidence: ${result.confidence.skinTypeConfidencePercentage}%'),
+                      Text(
+                          'Concern Confidence: ${result.confidence.concernConfidencePercentage}%'),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Recommendations
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Recommendations:',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: result.recommendations.length,
+                        itemBuilder: (context, index) {
+                          final product = result.recommendations[index];
+                          return Card(
+                            child: ListTile(
+                              title: Text(product.productName),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Type: ${product.productType}'),
+                                  Text('Price: ${product.price}'),
+                                ],
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.open_in_new),
+                                onPressed: () =>
+                                    _openProductUrl(product.productUrl),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Open product URL with better error handling
+  Future<void> _openProductUrl(String url) async {
+    try {
+      if (kDebugMode) {
+        print('Attempting to open URL: $url');
+      }
+
+      // Try to parse and encode URL properly
+      var uri = Uri.tryParse(url);
+
+      if (uri == null) {
+        // If parsing fails, try to manually create URI with proper encoding
+        try {
+          uri = Uri.parse(url.replaceAll(' ', '%20'));
+        } catch (e) {
+          _showErrorMessage('Invalid URL format: $url');
+          return;
+        }
+      }
+
+      // Try to launch URL directly
+      try {
+        // Try platform default first (let system choose app)
+        await launchUrl(
+          uri,
+          mode: LaunchMode.platformDefault,
+        );
+        if (kDebugMode) {
+          print('Successfully launched URL: $uri');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('Failed to launch with platform default, trying external: $e');
+        }
+        // Fallback: try external application
+        try {
+          await launchUrl(
+            uri,
+            mode: LaunchMode.externalApplication,
+          );
+        } catch (e2) {
+          if (kDebugMode) {
+            print('Failed to launch URL: $e2');
+          }
+          _showErrorMessage('Cannot open link. Please install a web browser.');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error opening URL: $e');
+      }
+      _showErrorMessage('Error opening link: ${e.toString()}');
+    }
+  }
+
+  /// Show error message
+  void _showErrorMessage(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> checkConflict() async {
     final product1 = product1Controller.text.trim();
@@ -136,26 +327,60 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+
+              // مؤشر حالة الخادم
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: serverConnected
+                      ? Colors.green.shade100
+                      : Colors.red.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: serverConnected ? Colors.green : Colors.red,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      serverConnected ? Icons.check_circle : Icons.error,
+                      color: serverConnected ? Colors.green : Colors.red,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        serverConnected
+                            ? 'Server Connected - Ready for Analysis'
+                            : 'Server Disconnected - Make sure Flask API is running',
+                        style: TextStyle(
+                          color: serverConnected
+                              ? Colors.green.shade800
+                              : Colors.red.shade800,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _checkServerStatus,
+                      child: const Text('Recheck'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
               GestureDetector(
                 onTap: () async {
+                  // Open gallery directly
                   final picker = ImagePicker();
                   final XFile? pickedFile = await picker.pickImage(
                     source: ImageSource.gallery,
-                    imageQuality: 92,
+                    imageQuality: 85,
                   );
-                  if (pickedFile == null) return;
-
-                  final File image = File(pickedFile.path);
-
-                  if (context.mounted) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RecommendedProductsScreen(
-                          imageFile: image,
-                        ),
-                      ),
-                    );
+                  if (pickedFile != null) {
+                    await _analyzeSkinWithNewService(pickedFile);
                   }
                 },
                 child: Container(
@@ -175,14 +400,31 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-             
+
+              // Loading indicator
+              if (isLoading)
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  child: const Column(
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text(
+                        'Analyzing skin...',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+
               // Row(
               //   children: [
               //     const Text("Language: "),
               //     const SizedBox(width: 12),
               //     DropdownButton<String>(
               //       value: selectedLanguage,
-              //       items: ["العربية", "English"]
+              //       items: ["Arabic", "English"]
               //           .map((lang) => DropdownMenuItem(
               //                 value: lang,
               //                 child: Text(lang),

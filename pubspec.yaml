@@ -5,7 +5,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.5 <3.6.0'   # متوافق مع Dart 3.5.x
+  sdk: '>=3.0.5 <4.0.0'   # متوافق مع Dart 3.9.2
 
 dependencies:
   flutter:
@@ -36,7 +36,7 @@ dependencies:
   awesome_notifications: ^0.10.1
 
   ## Firebase
-  firebase: ^9.0.2
+  firebase: ^9.0.3
   firebase_auth: ^5.3.1
   permission_handler: ^11.3.1
 
