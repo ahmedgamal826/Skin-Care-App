@@ -19,15 +19,39 @@ class SkinCareApiService {
   /// Check server status
   Future<bool> checkServerStatus() async {
     try {
-      final response = await _dio.get('/health');
+      final response = await _dio.get(
+        '/health',
+        options: Options(
+          validateStatus: (status) => status != null && status < 500,
+        ),
+      );
+
+      // إذا كان statusCode == 200، الخادم متصل ويعمل
       if (response.statusCode == 200) {
+        // التحقق من الحقول الإضافية بشكل آمن (اختياري)
         final data = response.data;
-        return data['status'] == 'healthy' &&
-            data['models_loaded'] == true &&
-            data['data_loaded'] == true;
+        if (data is Map<String, dynamic>) {
+          // إذا كانت الاستجابة JSON مع بيانات، نتحقق من الحقول
+          final status = data['status'];
+          final modelsLoaded = data['models_loaded'];
+          final dataLoaded = data['data_loaded'];
+
+          // إذا كانت الحقول موجودة، نتحقق من قيمها
+          // إذا لم تكن موجودة، نعتبر الخادم متصلًا (statusCode == 200)
+          if (status != null || modelsLoaded != null || dataLoaded != null) {
+            // نتحقق من الحقول فقط إذا كانت موجودة
+            final statusOk = status == null || status == 'healthy';
+            final modelsOk = modelsLoaded == null || modelsLoaded == true;
+            final dataOk = dataLoaded == null || dataLoaded == true;
+            return statusOk && modelsOk && dataOk;
+          }
+        }
+        // إذا كان statusCode == 200، نعتبر الخادم متصلًا
+        return true;
       }
       return false;
     } catch (e) {
+      // في حالة الخطأ، نعيد false
       return false;
     }
   }
@@ -199,39 +223,90 @@ class SkinCareApiService {
         ),
       });
 
-      // Send request to API
+      // استخدام /recommend مباشرة (هو الـ endpoint الموجود في Flask)
       final response = await _dio.post(
-        '/analyze_and_recommend',
+        '/recommend',
         data: formData,
+        options: Options(
+          validateStatus: (status) => status != null && status < 600,
+        ),
       );
 
       if (response.statusCode == 200) {
         final data = response.data;
-        final recommendations = <ProductRecommendation>[];
 
-        if (data['recommendations'] != null) {
-          for (var item in data['recommendations']) {
-            recommendations.add(ProductRecommendation.fromJson(item));
+        // التحقق من نجاح العملية
+        if (data['success'] == true) {
+          final recommendations = <ProductRecommendation>[];
+
+          // Flask API يعيد recommended_products وليس recommendations
+          final productsList = data['recommended_products'] as List?;
+          if (productsList != null) {
+            for (var item in productsList) {
+              recommendations.add(ProductRecommendation.fromJson(item));
+            }
           }
+
+          // استخدام confidence من Flask API إذا كان موجوداً، وإلا نستخدم قيم افتراضية
+          double skinTypeConfidence = 0.85; // قيمة افتراضية
+          double concernConfidence = 0.85; // قيمة افتراضية
+
+          if (data['confidence'] != null && data['confidence'] is Map) {
+            final confData = data['confidence'] as Map;
+            skinTypeConfidence =
+                (confData['skin_type_confidence'] as num?)?.toDouble() ?? 0.85;
+            concernConfidence =
+                (confData['concern_confidence'] as num?)?.toDouble() ?? 0.85;
+          } else if (data['skin_type_confidence'] != null ||
+              data['concern_confidence'] != null) {
+            // إذا كان confidence في المستوى العلوي من JSON
+            skinTypeConfidence =
+                (data['skin_type_confidence'] as num?)?.toDouble() ?? 0.85;
+            concernConfidence =
+                (data['concern_confidence'] as num?)?.toDouble() ?? 0.85;
+          }
+
+          final confidence = ConfidenceData(
+            skinTypeConfidence: skinTypeConfidence,
+            concernConfidence: concernConfidence,
+          );
+
+          return CompleteAnalysisResult(
+            skinType: data['skin_type'] as String? ?? 'Unknown',
+            concern: data['concern'] as String? ?? 'Unknown',
+            confidence: confidence,
+            recommendations: recommendations,
+            isSuccess: true,
+            errorMessage: null,
+          );
+        } else {
+          // إذا كان success == false
+          return CompleteAnalysisResult(
+            skinType: 'Unknown',
+            concern: 'Unknown',
+            confidence: ConfidenceData.empty(),
+            recommendations: [],
+            isSuccess: false,
+            errorMessage: data['error'] as String? ?? 'Failed to analyze image',
+          );
+        }
+      } else {
+        // معالجة الأخطاء الأخرى (400, 500, إلخ)
+        final data = response.data;
+        String errorMessage =
+            'Failed to analyze image. Error code: ${response.statusCode}';
+
+        if (data is Map && data['error'] != null) {
+          errorMessage = data['error'] as String;
         }
 
-        return CompleteAnalysisResult(
-          skinType: data['skin_type'] as String? ?? 'Unknown',
-          concern: data['concern'] as String? ?? 'Unknown',
-          confidence: ConfidenceData.fromJson(data['confidence'] ?? {}),
-          recommendations: recommendations,
-          isSuccess: true,
-          errorMessage: null,
-        );
-      } else {
         return CompleteAnalysisResult(
           skinType: 'Unknown',
           concern: 'Unknown',
           confidence: ConfidenceData.empty(),
           recommendations: [],
           isSuccess: false,
-          errorMessage:
-              'Failed to analyze image and get recommendations. Error code: ${response.statusCode}',
+          errorMessage: errorMessage,
         );
       }
     } on DioException catch (e) {
@@ -246,6 +321,13 @@ class SkinCareApiService {
             'Connection error. Make sure Flask API is running on port 5000';
       } else if (e.response?.statusCode != null) {
         errorMessage = 'Server error: ${e.response?.statusCode}';
+        // إذا كان هناك رسالة خطأ من الخادم
+        if (e.response?.data != null && e.response!.data is Map) {
+          final errorData = e.response!.data as Map;
+          if (errorData['error'] != null) {
+            errorMessage = errorData['error'] as String;
+          }
+        }
       }
 
       return CompleteAnalysisResult(
