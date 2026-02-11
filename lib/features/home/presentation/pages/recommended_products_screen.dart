@@ -271,6 +271,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../../app_colors.dart';
 import '../../../../core/Services/API/api_services_disease.dart';
 import '../../../../core/Services/API/api_service.dart';
 
@@ -334,19 +335,12 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   Future<void> _analyze() async {
     setState(() => _loading = true);
     try {
-      // أولاً: تحليل الصورة باستخدام DiseaseDetectionApiService للحصول على معلومات المرض
       final xFile = XFile(_image.path);
       final diseaseResult =
           await _diseaseApiService.detectSkinDisease(imageFile: xFile);
 
-      // تم تحليل المرض بنجاح
-
-      // استخدام session ID من API أو إنشاء واحد جديد
       _sessionId = DateTime.now().millisecondsSinceEpoch.toString();
 
-      // لا توجد رسالة مستخدم في هذا الوضع
-
-      // إنشاء رسالة AI بناءً على نتائج تحليل المرض
       String aiResponse = _createDiseaseResponse(diseaseResult);
       _messages.add(_Bubble(isUser: false, text: aiResponse));
 
@@ -381,7 +375,6 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
     _scrollToBottom();
 
     try {
-      // استخدام SkinApiClient للـ follow-up مع Gemini
       final aiReply = await _skinApiClient.followUp(
         sessionId: _sessionId!,
         message: q,
@@ -393,14 +386,12 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
       });
       _scrollToBottom();
     } catch (e) {
-      // في حالة فشل Gemini، إظهار رسالة خطأ مع الاحتفاظ برسالة المستخدم
       setState(() {
         _isOnline = false;
       });
 
       String errorMessage = e.toString();
       if (errorMessage.contains('Session expired')) {
-        // إعادة تحليل الصورة تلقائياً بدون رسالة
         await _reanalyzeAndRespond(q);
       } else {
         _snack("خطأ في الاتصال: $errorMessage");
@@ -410,30 +401,22 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
     }
   }
 
-  /// إعادة تحليل الصورة والرد على الرسالة
   Future<void> _reanalyzeAndRespond(String message) async {
     try {
       setState(() => _loading = true);
 
-      // إعادة تحليل الصورة باستخدام SkinApiClient للحصول على session_id صحيح
       final analysisResult = await _skinApiClient.analyze(
         imageFile: File(_image.path),
         message: message,
       );
 
-      // استخدام session_id من الـ API
       _sessionId = analysisResult.sessionId;
-
-      // لا نحتاج لإضافة رسالة المستخدم مرة أخرى لأنها موجودة بالفعل
-      // إضافة رد الـ API فقط
       _messages.add(_Bubble(isUser: false, text: analysisResult.response));
 
       setState(() {
         _isOnline = true;
       });
       _scrollToBottom();
-
-      // تم إعادة التحليل بنجاح بدون رسالة
     } catch (e) {
       _snack("فشل في إعادة التحليل: ${e.toString()}");
     } finally {
@@ -453,22 +436,14 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
     });
   }
 
-  /// تنظيف النص وإزالة النجوم وتحسين المظهر
   String _cleanText(String text) {
-    // إزالة النجوم من النص
     String cleanedText = text.replaceAll('**', '');
-
-    // تحسين المسافات ولكن الحفاظ على الأسطر الجديدة
     cleanedText = cleanedText.replaceAll(RegExp(r'[ \t]+'), ' ').trim();
-
-    // إضافة مسافات بعد النقطتين
     cleanedText = cleanedText.replaceAll(':', ': ');
-
     return cleanedText;
   }
 
   Future<void> _checkConnectionStatus() async {
-    // التحقق من حالة الخادم باستخدام SkinApiClient (المنفذ 5001)
     try {
       final isServerOnline = await _skinApiClient.checkServerStatus();
       if (mounted) {
@@ -507,7 +482,7 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   void _snack(String m) => ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(m),
-          backgroundColor: Colors.red.shade600,
+          backgroundColor: AppColors.darkPink,
           duration: const Duration(seconds: 4),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
@@ -518,13 +493,15 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xffF0E8E6),
+      backgroundColor: colorScheme.surface,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Skin Care Analyzer',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: colorScheme.onSurface),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -532,27 +509,25 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: colorScheme.primary,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.arrow_back_ios_new,
-              color: Colors.white,
+              color: colorScheme.onPrimary,
               size: 20,
             ),
           ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Container(
-        child: SafeArea(
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: SlideTransition(
-              position: _slideAnimation,
-              child:
-                  _sessionId == null ? _buildAnalyzeStage() : _buildChatStage(),
-            ),
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child:
+                _sessionId == null ? _buildAnalyzeStage() : _buildChatStage(),
           ),
         ),
       ),
@@ -561,17 +536,19 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
 
   // Stage 1: preview + note + start
   Widget _buildAnalyzeStage() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
       child: Column(
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   "Skin Care Analyzer",
                   style: TextStyle(
-                    color: Colors.black,
+                    color: colorScheme.onSurface,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -580,17 +557,15 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _isOnline
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.grey,
+                  color: _isOnline ? AppColors.mintTeal : AppColors.lavender,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   _isOnline ? "Online" : "Offline",
                   style: TextStyle(
                     color: _isOnline
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : Colors.white,
+                        ? AppColors.darkTeal
+                        : AppColors.darkLavender,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -601,13 +576,13 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
 
           const SizedBox(height: 25),
 
-          // Image preview with enhanced styling
+          // Image preview
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
+                  color: AppColors.darkWarm.withOpacity(0.2),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -615,47 +590,27 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: Stack(
-                children: [
-                  Image.file(
-                    _image,
-                    height: 280,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                  // Positioned(
-                  //   top: 12,
-                  //   right: 12,
-                  //   child: Container(
-                  //     padding: const EdgeInsets.all(8),
-                  //     decoration: BoxDecoration(
-                  //       color: Colors.black.withOpacity(0.5),
-                  //       borderRadius: BorderRadius.circular(12),
-                  //     ),
-                  //     child: const Icon(
-                  //       Icons.visibility,
-                  //       color: Colors.white,
-                  //       size: 20,
-                  //     ),
-                  //   ),
-                  // ),
-                ],
+              child: Image.file(
+                _image,
+                height: 280,
+                width: double.infinity,
+                fit: BoxFit.cover,
               ),
             ),
           ),
 
           const SizedBox(height: 24),
 
-          // Enhanced analyze button
+          // Analyze button
           Container(
             width: double.infinity,
             height: 56,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: colorScheme.primary,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.4),
+                  color: colorScheme.primary.withOpacity(0.3),
                   blurRadius: 15,
                   offset: const Offset(0, 8),
                 ),
@@ -677,27 +632,27 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.lightPeach,
                           ),
                         )
                       else
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: AppColors.lightPeach.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.analytics_outlined,
-                            color: Colors.white,
+                            color: colorScheme.onPrimary,
                             size: 20,
                           ),
                         ),
                       const SizedBox(width: 12),
                       Text(
                         _loading ? "Analyzing..." : "Start Analysis",
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: colorScheme.onPrimary,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -715,16 +670,18 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
 
   // Stage 2: chat view
   Widget _buildChatStage() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       children: [
         // Chat header
         Container(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: AppColors.softPink.withOpacity(0.3),
             border: Border(
               bottom: BorderSide(
-                color: Colors.white.withOpacity(0.2),
+                color: AppColors.softPink.withOpacity(0.5),
                 width: 1,
               ),
             ),
@@ -734,21 +691,21 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: colorScheme.primary,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.psychology_outlined,
-                  color: Colors.white,
+                  color: colorScheme.onPrimary,
                   size: 20,
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
                   "Skin Care Analyzer",
                   style: TextStyle(
-                    color: Colors.black,
+                    color: colorScheme.onSurface,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -757,17 +714,15 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _isOnline
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.grey,
+                  color: _isOnline ? AppColors.mintTeal : AppColors.lavender,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   _isOnline ? "Online" : "Offline",
                   style: TextStyle(
                     color: _isOnline
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : Colors.white,
+                        ? AppColors.darkTeal
+                        : AppColors.darkLavender,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -786,7 +741,7 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.transparent,
-                  Colors.white.withOpacity(0.05),
+                  AppColors.peach.withOpacity(0.1),
                 ],
               ),
             ),
@@ -815,8 +770,8 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                           ],
                           Flexible(
                             child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: m.isUser ? 20 : 20,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
                                 vertical: 12,
                               ),
                               constraints: BoxConstraints(
@@ -824,8 +779,8 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                               ),
                               decoration: BoxDecoration(
                                 color: m.isUser
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Colors.white.withOpacity(0.95),
+                                    ? colorScheme.primary
+                                    : AppColors.lightPeach.withOpacity(0.95),
                                 borderRadius: BorderRadius.only(
                                   topLeft: const Radius.circular(20),
                                   topRight: const Radius.circular(20),
@@ -838,7 +793,7 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
+                                    color: AppColors.darkWarm.withOpacity(0.08),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -853,8 +808,8 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                                   _cleanText(m.text),
                                   style: TextStyle(
                                     color: m.isUser
-                                        ? Colors.white
-                                        : Colors.black87,
+                                        ? colorScheme.onPrimary
+                                        : colorScheme.onSurface,
                                     height: 1.5,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w400,
@@ -875,12 +830,12 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
+                                color: colorScheme.primary,
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.smart_toy_outlined,
-                                color: Colors.white,
+                                color: colorScheme.onPrimary,
                                 size: 14,
                               ),
                             ),
@@ -889,12 +844,12 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
+                                color: AppColors.lavender,
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.person_outline,
-                                color: Colors.white,
+                                color: AppColors.darkLavender,
                                 size: 14,
                               ),
                             ),
@@ -919,15 +874,15 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
+                    color: AppColors.softPink.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const SizedBox(
+                  child: SizedBox(
                     height: 16,
                     width: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.black,
+                      color: colorScheme.primary,
                     ),
                   ),
                 ),
@@ -935,7 +890,7 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                 Text(
                   "Typing...",
                   style: TextStyle(
-                    color: Colors.black.withOpacity(0.8),
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: 14,
                   ),
                 ),
@@ -947,10 +902,10 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.95),
+            color: AppColors.lightPeach.withOpacity(0.95),
             border: Border(
               top: BorderSide(
-                color: Colors.grey.withOpacity(0.2),
+                color: AppColors.softPink.withOpacity(0.3),
                 width: 1,
               ),
             ),
@@ -960,10 +915,10 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: AppColors.lightPeach,
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: Colors.grey.withOpacity(0.3),
+                      color: AppColors.softPink.withOpacity(0.5),
                       width: 1,
                     ),
                   ),
@@ -986,7 +941,7 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                     decoration: InputDecoration(
                       hintText: 'Ask a follow-up question...',
                       hintStyle: TextStyle(
-                        color: Colors.grey.shade600,
+                        color: AppColors.darkLavender.withOpacity(0.6),
                         fontSize: 14,
                       ),
                       border: OutlineInputBorder(
@@ -1001,7 +956,7 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                       ),
                       prefixIcon: Icon(
                         Icons.edit_outlined,
-                        color: Colors.grey.shade600,
+                        color: AppColors.lavender,
                         size: 20,
                       ),
                     ),
@@ -1014,14 +969,11 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
               const SizedBox(width: 12),
               Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: colorScheme.primary,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .primary
-                          .withOpacity(0.3),
+                      color: colorScheme.primary.withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -1034,9 +986,9 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
                     onTap: _loading ? null : _sendFollowUp,
                     child: Container(
                       padding: const EdgeInsets.all(12),
-                      child: const Icon(
+                      child: Icon(
                         Icons.send_rounded,
-                        color: Colors.white,
+                        color: colorScheme.onPrimary,
                         size: 20,
                       ),
                     ),

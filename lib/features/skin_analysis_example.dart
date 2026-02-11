@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/Services/API/skin_care_api_service.dart';
+import '../app_colors.dart';
 
 /// Example of how to use SkinCareApiService in the app
 class SkinCareAnalysisExample extends StatefulWidget {
@@ -347,8 +348,8 @@ class _SkinCareAnalysisExampleState extends State<SkinCareAnalysisExample> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('تحليل البشرة والتوصيات'),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.mintTeal,
+        foregroundColor: AppColors.darkTeal,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -358,23 +359,25 @@ class _SkinCareAnalysisExampleState extends State<SkinCareAnalysisExample> {
             // حالة الخادم
             Card(
               color: _serverConnected
-                  ? Colors.green.shade100
-                  : Colors.red.shade100,
+                  ? AppColors.lightMint
+                  : AppColors.softPink,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
                     Icon(
                       _serverConnected ? Icons.check_circle : Icons.error,
-                      color: _serverConnected ? Colors.green : Colors.red,
+                      color: _serverConnected
+                          ? AppColors.mintTeal
+                          : AppColors.mauve,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       _serverConnected ? 'الخادم متصل' : 'الخادم غير متصل',
                       style: TextStyle(
                         color: _serverConnected
-                            ? Colors.green.shade800
-                            : Colors.red.shade800,
+                            ? AppColors.darkTeal
+                            : AppColors.darkPink,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -393,12 +396,12 @@ class _SkinCareAnalysisExampleState extends State<SkinCareAnalysisExample> {
             // رسالة الخطأ
             if (_errorMessage != null)
               Card(
-                color: Colors.red.shade100,
+                color: AppColors.softPink,
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Text(
                     _errorMessage!,
-                    style: TextStyle(color: Colors.red.shade800),
+                    style: const TextStyle(color: AppColors.darkPink),
                   ),
                 ),
               ),
@@ -443,8 +446,8 @@ class _SkinCareAnalysisExampleState extends State<SkinCareAnalysisExample> {
               icon: const Icon(Icons.analytics),
               label: const Text('تحليل كامل مع التوصيات'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.mauve,
+                foregroundColor: AppColors.darkMauve,
               ),
             ),
 

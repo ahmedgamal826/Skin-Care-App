@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../app_colors.dart';
 import '../../../disease_detection/presentation/pages/disease_detection_screen.dart';
 
 /// بطاقة كشف سرطان الجلد للصفحة الرئيسية
@@ -35,12 +36,12 @@ class DiseaseDetectionCard extends StatelessWidget {
         padding:
             padding ?? const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
         decoration: BoxDecoration(
-          color: backgroundColor ?? Colors.red[50],
+          color: backgroundColor ?? AppColors.lightMint,
           borderRadius: BorderRadius.circular(borderRadius ?? 16),
-          border: Border.all(color: Colors.red[200]!),
+          border: Border.all(color: AppColors.mintTeal),
           boxShadow: [
             BoxShadow(
-              color: Colors.red.withOpacity(0.1),
+              color: AppColors.mintTeal.withOpacity(0.15),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -51,12 +52,12 @@ class DiseaseDetectionCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: iconColor ?? Colors.red[100],
+                color: iconColor ?? AppColors.mintTeal.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
                 Icons.medical_services,
-                color: Colors.red[600],
+                color: AppColors.darkTeal,
                 size: 28,
               ),
             ),
@@ -67,10 +68,10 @@ class DiseaseDetectionCard extends StatelessWidget {
                 children: [
                   Text(
                     title ?? "كشف سرطان الجلد",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: AppColors.darkWarm,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -78,7 +79,7 @@ class DiseaseDetectionCard extends StatelessWidget {
                     subtitle ?? "فحص الصور للكشف عن مشاكل جلدية محتملة",
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey[600],
+                      color: AppColors.darkLavender,
                     ),
                   ),
                 ],
@@ -87,13 +88,13 @@ class DiseaseDetectionCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.red[100],
+                color: AppColors.mintTeal.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
-                color: Colors.red[600],
+                color: AppColors.darkTeal,
               ),
             ),
           ],
@@ -131,12 +132,12 @@ class DiseaseDetectionMiniCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.lightPeach,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.red[200]!),
+          border: Border.all(color: AppColors.mintTeal),
           boxShadow: [
             BoxShadow(
-              color: Colors.red.withOpacity(0.1),
+              color: AppColors.mintTeal.withOpacity(0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -147,16 +148,16 @@ class DiseaseDetectionMiniCard extends StatelessWidget {
           children: [
             Icon(
               icon ?? Icons.medical_services,
-              color: Colors.red[600],
+              color: AppColors.darkTeal,
               size: 32,
             ),
             const SizedBox(height: 8),
             Text(
               title ?? "كشف سرطان الجلد",
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: AppColors.darkWarm,
               ),
               textAlign: TextAlign.center,
             ),

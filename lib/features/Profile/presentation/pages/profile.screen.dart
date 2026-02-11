@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../Data/Model/User/user.model.dart';
 import '../../../../Data/Model/User/users_enums.dart';
 import '../../../../Data/Repositories/user.repo.dart';
+import '../../../../app_colors.dart';
 import '../../../../core/Services/Auth/auth.service.dart';
 import '../../../../core/Services/Auth/src/Providers/auth_provider.dart';
 import '../../../../core/utils/SnackBar/snackbar.helper.dart';
@@ -93,9 +94,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             isLoading = false;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('You must be logged in to view profile'),
-              backgroundColor: Colors.orange,
+            SnackBar(
+              content: const Text('You must be logged in to view profile'),
+              backgroundColor: AppColors.mauve,
             ),
           );
         }
@@ -110,7 +111,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error loading profile: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: Theme.of(context).colorScheme.error,
             duration: const Duration(seconds: 5),
           ),
         );
@@ -120,23 +121,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     if (isLoading) {
       return Scaffold(
-        backgroundColor: const Color(0xFFF5EDE8),
+        backgroundColor: colorScheme.surface,
         appBar: AppBar(
           title: const Text("Profile"),
           centerTitle: true,
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
-        body: const Center(
-          child: CircularProgressIndicator(),
+        body: Center(
+          child: CircularProgressIndicator(color: colorScheme.primary),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5EDE8),
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: const Text("Profile"),
         centerTitle: true,
@@ -163,16 +166,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Text(
               'Sign Out',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
+                color: colorScheme.error,
               ),
             ),
           ),
         ],
       ),
       body: isLoading
-          ? Center(
-              child: CircularProgressIndicator(
-                  color: Theme.of(context).primaryColor))
+          ? Center(child: CircularProgressIndicator(color: colorScheme.primary))
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Form(
@@ -211,6 +212,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const Text("Allergies to skincare?"),
                         const Spacer(),
                         Switch(
+                          inactiveThumbColor: Colors.white,
                           value: hasAllergies,
                           onChanged: (val) =>
                               setState(() => hasAllergies = val),
@@ -299,7 +301,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.lightPeach,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
       validator: (val) {
@@ -322,7 +324,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.lightPeach,
         borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButtonFormField<T>(
@@ -333,7 +335,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           border: InputBorder.none,
         ),
         icon: const Icon(Icons.arrow_drop_down),
-        dropdownColor: Colors.white,
+        dropdownColor: AppColors.lightPeach,
         items: items
             .map(
               (e) => DropdownMenuItem(

@@ -2,6 +2,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+
 import '../../../../core/Services/Auth/auth.service.dart';
 import '../../../../core/Services/Auth/models/auth.model.dart';
 import '../../../../core/Services/Auth/src/Providers/auth_provider.dart';
@@ -39,17 +40,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   Widget build(BuildContext context) {
-    //SECTION - Build Setup
-    //t2 -Values
-    //double w = MediaQuery.of(context).size.width;
-    //double h = MediaQuery.of(context).size.height;
-    //t2 -Values
-    //
-    //t2 -Widgets
-    //t2 -Widgets
-    //!SECTION
+    final colorScheme = Theme.of(context).colorScheme;
 
-    //SECTION - Build Return
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -69,7 +61,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     'Log in to continue your journey',
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 16,
                   ),
                   TextFormField(
@@ -106,7 +98,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           _obscurePassword
                               ? Icons.visibility
                               : Icons.visibility_off,
-                          color: Colors.grey,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                         onPressed: () {
                           setState(() {
@@ -146,7 +138,6 @@ class _SignInScreenState extends State<SignInScreen> {
                                 });
 
                                 try {
-                                  // Instantiate the email authentication method
                                   EmailAuthMethod emailAuthMethod =
                                       EmailAuthMethod(
                                     email: _emailController.text.trim(),
@@ -193,13 +184,13 @@ class _SignInScreenState extends State<SignInScreen> {
                             },
                       title: _isLoading ? "" : "Login",
                       child: _isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    colorScheme.onPrimary),
                               ),
                             )
                           : null,
@@ -220,14 +211,14 @@ class _SignInScreenState extends State<SignInScreen> {
                       child: Text.rich(
                         TextSpan(
                           text: 'Already have an account? ',
-                          style: const TextStyle(
-                            color: Color(0xff939393),
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
                           ),
                           children: <InlineSpan>[
                             TextSpan(
                               text: 'Sign Up',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.tertiary,
+                                color: colorScheme.tertiary,
                               ),
                             )
                           ],
@@ -242,7 +233,6 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
       ),
     );
-    //!SECTION
   }
 
   @override

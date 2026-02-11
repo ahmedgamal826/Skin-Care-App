@@ -37,11 +37,11 @@ class SectionTitle extends StatelessWidget {
         Text(
           title,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
-            fontFamily: 'SF Pro Display',
             fontWeight: FontWeight.w500,
             letterSpacing: -0.48,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         (onPressed != null)
@@ -50,7 +50,7 @@ class SectionTitle extends StatelessWidget {
                 icon: Icon(
                   Icons.add,
                   size: 24,
-                  color: Theme.of(context).primaryColor,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               )
             : Container()

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../Data/Model/User/user.model.dart' as User;
 import '../../../../Data/Repositories/user.repo.dart';
+
 import '../../../../core/Services/Auth/auth.service.dart';
 import '../../../../core/Services/Auth/models/auth.model.dart';
 import '../../../../core/Services/Auth/src/Providers/auth_provider.dart';
@@ -56,25 +57,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   //t2 --Constants
   //!SECTION
-  //SECTION - Stateless functions
-  //!SECTION
-
-  //SECTION - Action Callbacks
-  //!SECTION
 
   @override
   Widget build(BuildContext context) {
-    //SECTION - Build Setup
-    //t2 -Values
-    // double w = MediaQuery.of(context).size.width;
-    // double h = MediaQuery.of(context).size.height;
-    //t2 -Values
-    //
-    //t2 -Widgets
-    //t2 -Widgets
-    //!SECTION
+    final colorScheme = Theme.of(context).colorScheme;
 
-    //SECTION - Build Return
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -127,7 +114,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           _obscurePassword
                               ? Icons.visibility
                               : Icons.visibility_off,
-                          color: Colors.grey,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                         onPressed: () {
                           setState(() {
@@ -196,7 +183,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your phone number';
                       }
-                      // Accept any 11-digit phone number
                       if (!RegExp(r'^\d{11}$').hasMatch(value)) {
                         return 'Please enter a valid 11-digit phone number';
                       }
@@ -280,13 +266,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             },
                       title: _isLoading ? "" : "Sign up",
                       child: _isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    colorScheme.onPrimary),
                               ),
                             )
                           : null,
@@ -307,14 +293,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: Text.rich(
                         TextSpan(
                           text: 'Already have an account? ',
-                          style: const TextStyle(
-                            color: Color(0xff939393),
+                          style: TextStyle(
+                            color: colorScheme.onSurfaceVariant,
                           ),
                           children: <InlineSpan>[
                             TextSpan(
                               text: 'Log in',
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.tertiary,
+                                color: colorScheme.tertiary,
                               ),
                             )
                           ],
@@ -330,13 +316,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
       resizeToAvoidBottomInset: true,
     );
-    //!SECTION
   }
 
   @override
   void dispose() {
-    //SECTION - Disposable variables
-    //!SECTION
     super.dispose();
   }
 }

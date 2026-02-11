@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../app_colors.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String title;
@@ -22,7 +23,7 @@ class PrimaryButton extends StatelessWidget {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: isEnabled
-            ? (color ?? Theme.of(context).colorScheme.primary)
+            ? (color ?? AppColors.darkWarm)
             : Theme.of(context).disabledColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(100),
@@ -34,7 +35,7 @@ class PrimaryButton extends StatelessWidget {
             title,
             style: TextStyle(
               color: isEnabled
-                  ? Theme.of(context).colorScheme.onPrimary
+                  ? Colors.white
                   : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
             ),
           ),

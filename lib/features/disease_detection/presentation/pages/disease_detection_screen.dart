@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../../app_colors.dart';
 import '../../../../core/Services/API/api_services_disease.dart';
 import '../../../home/presentation/pages/recommended_products_screen.dart';
 
@@ -22,11 +23,13 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('كشف سرطان الجلد'),
-        backgroundColor: Colors.blue[600],
-        foregroundColor: Colors.white,
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -34,12 +37,13 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // منطقة عرض الصورة
+              // Image preview area
               Container(
                 height: 250,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
+                  border: Border.all(color: colorScheme.outlineVariant),
                   borderRadius: BorderRadius.circular(12),
+                  color: AppColors.lightPeach,
                 ),
                 child: _selectedImage != null
                     ? ClipRRect(
@@ -50,20 +54,20 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                           width: double.infinity,
                         ),
                       )
-                    : const Center(
+                    : Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.image,
                               size: 64,
-                              color: Colors.grey,
+                              color: AppColors.lavender,
                             ),
-                            SizedBox(height: 8),
+                            const SizedBox(height: 8),
                             Text(
                               'لم يتم اختيار صورة',
                               style: TextStyle(
-                                color: Colors.grey,
+                                color: colorScheme.onSurfaceVariant,
                                 fontSize: 16,
                               ),
                             ),
@@ -74,7 +78,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
 
               const SizedBox(height: 16),
 
-              // أزرار اختيار الصورة
+              // Image selection buttons
               Row(
                 children: [
                   Expanded(
@@ -83,8 +87,8 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                       icon: const Icon(Icons.photo_library),
                       label: const Text('من المعرض'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue[600],
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.mintTeal,
+                        foregroundColor: AppColors.darkTeal,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
@@ -96,8 +100,8 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                       icon: const Icon(Icons.camera_alt),
                       label: const Text('من الكاميرا'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green[600],
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.lavender,
+                        foregroundColor: AppColors.darkLavender,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
@@ -107,33 +111,34 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
 
               const SizedBox(height: 16),
 
-              // زر التحليل
+              // Analyze button
               ElevatedButton(
                 onPressed: _selectedImage != null && !_isLoading
                     ? _analyzeImage
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange[600],
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.mauve,
+                  foregroundColor: AppColors.darkMauve,
+                  disabledBackgroundColor: AppColors.softPink.withOpacity(0.5),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
                 child: _isLoading
-                    ? const Row(
+                    ? Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
-                              color: Colors.white,
+                              color: AppColors.darkMauve,
                               strokeWidth: 2,
                             ),
                           ),
-                          SizedBox(width: 12),
-                          Text('جاري التحليل...'),
+                          const SizedBox(width: 12),
+                          const Text('جاري التحليل...'),
                         ],
                       )
                     : const Text(
@@ -145,18 +150,18 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
 
               const SizedBox(height: 16),
 
-              // عرض النتائج
+              // Results display
               if (_detectionResult != null) ...[
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: _detectionResult!.isSuccessful
-                        ? Colors.green[50]
-                        : Colors.red[50],
+                        ? AppColors.lightMint
+                        : AppColors.softPink.withOpacity(0.5),
                     border: Border.all(
                       color: _detectionResult!.isSuccessful
-                          ? Colors.green[300]!
-                          : Colors.red[300]!,
+                          ? AppColors.mintTeal
+                          : AppColors.mauve,
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -170,8 +175,8 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                                 ? Icons.check_circle
                                 : Icons.error,
                             color: _detectionResult!.isSuccessful
-                                ? Colors.green[600]
-                                : Colors.red[600],
+                                ? AppColors.darkTeal
+                                : AppColors.darkPink,
                           ),
                           const SizedBox(width: 8),
                           Text(
@@ -182,8 +187,8 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: _detectionResult!.isSuccessful
-                                  ? Colors.green[700]
-                                  : Colors.red[700],
+                                  ? AppColors.darkTeal
+                                  : AppColors.darkPink,
                             ),
                           ),
                         ],
@@ -201,14 +206,14 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                           'Description:',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.grey[700],
+                            color: AppColors.darkWarm,
                           ),
                         ),
                         const SizedBox(height: 4),
                         _buildDescriptionWithCopy(
                             _detectionResult!.diseaseDescriptionEnglish),
                         const SizedBox(height: 12),
-                        // زر Gemini Chat
+                        // Gemini Chat button
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton.icon(
@@ -218,8 +223,8 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                             label:
                                 const Text('Get AI Treatment Recommendations'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue[600],
-                              foregroundColor: Colors.white,
+                              backgroundColor: AppColors.mintTeal,
+                              foregroundColor: AppColors.darkTeal,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -231,14 +236,14 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                         const SizedBox(height: 8),
                         Text(
                           _detectionResult!.errorMessage ?? 'حدث خطأ غير معروف',
-                          style: TextStyle(color: Colors.red[600]),
+                          style: TextStyle(color: AppColors.darkPink),
                         ),
                       ],
                     ],
                   ),
                 ),
               ],
-              const SizedBox(height: 16), // مساحة إضافية في النهاية
+              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -258,7 +263,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
               label,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.grey[700],
+                color: AppColors.darkWarm,
               ),
             ),
           ),
@@ -276,7 +281,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                   icon: Icon(
                     Icons.copy,
                     size: 18,
-                    color: Colors.blue[600],
+                    color: AppColors.mintTeal,
                   ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -293,9 +298,9 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: AppColors.lightPeach,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: AppColors.peach),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -304,7 +309,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
             child: Text(
               description,
               style: TextStyle(
-                color: Colors.grey[600],
+                color: AppColors.darkWarm,
                 fontSize: 12,
                 height: 1.3,
               ),
@@ -316,7 +321,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
             icon: Icon(
               Icons.copy,
               size: 18,
-              color: Colors.blue[600],
+              color: AppColors.mintTeal,
             ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -338,7 +343,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
       if (image != null) {
         setState(() {
           _selectedImage = image;
-          _detectionResult = null; // إعادة تعيين النتائج
+          _detectionResult = null;
         });
       }
     } catch (e) {
@@ -358,7 +363,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
       if (image != null) {
         setState(() {
           _selectedImage = image;
-          _detectionResult = null; // إعادة تعيين النتائج
+          _detectionResult = null;
         });
       }
     } catch (e) {
@@ -398,7 +403,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red[600],
+        backgroundColor: AppColors.darkPink,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -409,7 +414,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('تم نسخ النص'),
-        backgroundColor: Colors.green[600],
+        backgroundColor: AppColors.darkTeal,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
       ),
@@ -418,7 +423,6 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
 
   void _openGeminiChat(String diseaseName) {
     if (_selectedImage != null && _detectionResult != null) {
-      // إنشاء صفحة الشات مباشرة مع session ID
       Navigator.push(
         context,
         MaterialPageRoute(

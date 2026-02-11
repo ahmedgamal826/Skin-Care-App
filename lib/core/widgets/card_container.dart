@@ -27,13 +27,15 @@ class CardContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(16),
       clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
+        color: colorScheme.surfaceContainerHighest,
         shape: RoundedRectangleBorder(
-          side: const BorderSide(width: 1, color: Color(0xFFBDC9C5)),
+          side: BorderSide(width: 1, color: colorScheme.outlineVariant),
           borderRadius: BorderRadius.circular(12),
         ),
       ),
@@ -42,13 +44,12 @@ class CardContainer extends StatelessWidget {
         children: [
           Text(
             title,
-            style:
-                TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  letterSpacing: 0.50,
-                ),
+            style: TextStyle(
+              color: colorScheme.onSurface,
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0.50,
+            ),
           ),
           const SizedBox(
             height: 16,
@@ -60,16 +61,17 @@ class CardContainer extends StatelessWidget {
                 children: [
                   Text(
                     measuredValue,
-                    style:textStyle ?? TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w400,
-                    ),
+                    style: textStyle ??
+                        TextStyle(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w400,
+                        ),
                   ),
                   Text(
                     measurementUnit ?? "",
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      color: colorScheme.onSurfaceVariant,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.50,
@@ -78,22 +80,19 @@ class CardContainer extends StatelessWidget {
                 ],
               ),
               CircleAvatar(
-                backgroundColor:
-                    Theme.of(context).colorScheme.secondaryContainer,
+                backgroundColor: colorScheme.secondaryContainer,
                 radius: 24,
                 child: icon != null
                     ? Icon(
                         icon,
                         size: 24,
-                        color:
-                            Theme.of(context).colorScheme.onSecondaryContainer,
+                        color: colorScheme.onSecondaryContainer,
                       )
                     : Image.asset(
                         imagePath!,
                         height: 24,
                         width: 24,
-                        color:
-                            Theme.of(context).colorScheme.onSecondaryContainer,
+                        color: colorScheme.onSecondaryContainer,
                       ),
               )
             ],
@@ -108,7 +107,7 @@ class CardContainer extends StatelessWidget {
                   subtitle ?? "",
                   style: TextStyle(
                     fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w400,
                     letterSpacing: 0.25,
                   ),
@@ -118,7 +117,7 @@ class CardContainer extends StatelessWidget {
               ? Text(
                   description!,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     letterSpacing: 0.50,

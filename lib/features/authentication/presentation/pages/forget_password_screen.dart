@@ -67,6 +67,8 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Reset Password')),
       body: Form(
@@ -80,7 +82,6 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 decoration: const InputDecoration(
                   hintText: "exa@example.com",
                   labelText: "Email",
-                  border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -108,12 +109,13 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             onPressed: _isLoading ? null : _resetPassword,
             title: _isLoading ? "" : 'Reset Password',
             child: _isLoading
-                ? const SizedBox(
+                ? SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          colorScheme.onPrimary),
                     ),
                   )
                 : null,

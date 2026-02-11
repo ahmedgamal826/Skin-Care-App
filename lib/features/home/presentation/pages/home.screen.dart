@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import '../../../../Data/Model/User/user.model.dart';
+import '../../../../app_colors.dart';
 import '../../../../core/Services/API/skin_care_api_service.dart';
 import '../../../profile/presentation/pages/profile.screen.dart';
 import '../../../skin_analysis/presentation/pages/skin_analysis_result_screen.dart';
@@ -25,7 +26,6 @@ class _HomeScreenState extends State<HomeScreen> {
   String? responseMessage;
   String selectedLanguage = 'English';
 
-  // إضافة الخدمة الجديدة
   final SkinCareApiService _skinCareApiService = SkinCareApiService();
 
   @override
@@ -52,7 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _analyzeSkinWithNewService(XFile imageFile) async {
     if (!mounted) return;
 
-    // Navigate to the new result screen which will handle analysis
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -76,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final url = Uri.parse('https://api.openai.com/v1/chat/completions');
     final apiKey =
-        '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'; // Replace this
+        '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';
 
     try {
       final response = await http.post(
@@ -111,16 +110,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xffF0E8E6),
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: const Color(0xffF0E8E6),
-        title: const Text('Welcome back 👋'),
+        backgroundColor: colorScheme.surface,
+        title: Text(
+          'Welcome back 👋',
+          style: TextStyle(color: colorScheme.onSurface),
+        ),
         actions: [
           IconButton(
             icon: Icon(
               Icons.person_2_outlined,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
               size: 24,
             ),
             onPressed: () {
@@ -140,10 +144,11 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Banner container
               Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: const Color(0xffEEC6BA),
+                  color: AppColors.softPink,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 alignment: Alignment.center,
@@ -156,11 +161,21 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             TextSpan(
                               text: "Find the right\n",
-                              style: Theme.of(context).textTheme.titleLarge,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
+                                    color: AppColors.darkPink,
+                                  ),
                             ),
                             TextSpan(
                               text: "product for your skin",
-                              style: Theme.of(context).textTheme.headlineLarge,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineLarge
+                                  ?.copyWith(
+                                    color: AppColors.darkPink,
+                                  ),
                             ),
                           ],
                         ),
@@ -172,16 +187,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 16),
 
-              // مؤشر حالة الخادم
+              // Server status indicator
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: serverConnected
-                      ? Colors.green.shade100
-                      : Colors.red.shade100,
+                      ? AppColors.lightMint
+                      : AppColors.softPink,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: serverConnected ? Colors.green : Colors.red,
+                    color:
+                        serverConnected ? AppColors.mintTeal : AppColors.mauve,
                     width: 1,
                   ),
                 ),
@@ -189,7 +205,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Icon(
                       serverConnected ? Icons.check_circle : Icons.error,
-                      color: serverConnected ? Colors.green : Colors.red,
+                      color: serverConnected
+                          ? AppColors.darkTeal
+                          : AppColors.darkPink,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -200,24 +218,27 @@ class _HomeScreenState extends State<HomeScreen> {
                             : 'Server Disconnected - Make sure Flask API is running',
                         style: TextStyle(
                           color: serverConnected
-                              ? Colors.green.shade800
-                              : Colors.red.shade800,
+                              ? AppColors.darkTeal
+                              : AppColors.darkPink,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
                     TextButton(
                       onPressed: _checkServerStatus,
-                      child: const Text('Recheck'),
+                      child: Text(
+                        'Recheck',
+                        style: TextStyle(color: Colors.black),
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
 
+              // Scan face button
               GestureDetector(
                 onTap: () async {
-                  // Open gallery directly
                   final picker = ImagePicker();
                   final XFile? pickedFile = await picker.pickImage(
                     source: ImageSource.gallery,
@@ -231,15 +252,31 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
+                    color: AppColors.lightPeach,
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: colorScheme.outlineVariant,
+                      width: 1,
+                    ),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.face_retouching_natural),
-                      SizedBox(width: 12),
-                      Expanded(child: Text("Scan your face with AI")),
-                      Icon(Icons.arrow_forward_ios, size: 16),
+                      Icon(
+                        Icons.face_retouching_natural,
+                        color: colorScheme.primary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "Scan your face with AI",
+                          style: TextStyle(color: colorScheme.onSurface),
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ],
                   ),
                 ),
@@ -249,76 +286,23 @@ class _HomeScreenState extends State<HomeScreen> {
               if (isLoading)
                 Container(
                   padding: const EdgeInsets.all(20),
-                  child: const Column(
+                  child: Column(
                     children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
+                      CircularProgressIndicator(
+                        color: colorScheme.primary,
+                      ),
+                      const SizedBox(height: 16),
                       Text(
                         'Analyzing skin...',
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: colorScheme.onSurface,
+                        ),
                       ),
                     ],
                   ),
                 ),
-
-              // Row(
-              //   children: [
-              //     const Text("Language: "),
-              //     const SizedBox(width: 12),
-              //     DropdownButton<String>(
-              //       value: selectedLanguage,
-              //       items: ["Arabic", "English"]
-              //           .map((lang) => DropdownMenuItem(
-              //                 value: lang,
-              //                 child: Text(lang),
-              //               ))
-              //           .toList(),
-              //       onChanged: (val) {
-              //         setState(() => selectedLanguage = val!);
-              //       },
-              //     ),
-              //   ],
-              // ),
-              // const SizedBox(height: 12),
-              // TextField(
-              //   controller: product1Controller,
-              //   decoration: const InputDecoration(
-              //     labelText: 'First Product Name',
-              //     border: OutlineInputBorder(),
-              //   ),
-              // ),
-              // const SizedBox(height: 12),
-              // TextField(
-              //   controller: product2Controller,
-              //   decoration: const InputDecoration(
-              //     labelText: 'Second Product Name',
-              //     border: OutlineInputBorder(),
-              //   ),
-              // ),
-              // const SizedBox(height: 12),
-              // SizedBox(
-              //   width: double.infinity,
-              //   child: PrimaryButton(
-              //     onPressed: isLoading ? null : checkConflict,
-              //     title: isLoading ? "Checking..." : "Check Conflict",
-              //   ),
-              // ),
-              // if (responseMessage != null) ...[
-              //   const SizedBox(height: 16),
-              //   Container(
-              //     width: double.infinity,
-              //     decoration: BoxDecoration(
-              //       color: Colors.white,
-              //       borderRadius: BorderRadius.circular(12),
-              //       border: Border.all(color: Colors.grey.shade300),
-              //     ),
-              //     padding: const EdgeInsets.all(12),
-              //     child: Text(
-              //       responseMessage!,
-              //       style: Theme.of(context).textTheme.bodyLarge,
-              //     ),
-              //   )
             ],
           ),
         ),

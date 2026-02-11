@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../app_colors.dart';
 import '../../../../core/Services/API/skin_care_api_service.dart';
 
 class SkinAnalysisResultScreen extends StatefulWidget {
@@ -76,12 +77,14 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xffF0E8E6), // Match home screen background
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: const Text('Skin Analysis'),
-        backgroundColor: const Color(0xffF0E8E6),
-        foregroundColor: Colors.black87,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -113,15 +116,16 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xff8D6E63)),
+          CircularProgressIndicator(
+            valueColor:
+                AlwaysStoppedAnimation<Color>(AppColors.mintTeal),
             strokeWidth: 4,
           ),
           const SizedBox(height: 24),
           Text(
             'Analyzing your skin...',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: const Color(0xff5D4037),
+                  color: AppColors.darkTeal,
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -129,7 +133,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
           Text(
             'Please wait while we analyze your photo',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xff8D6E63),
+                  color: AppColors.darkLavender,
                   fontWeight: FontWeight.w500,
                 ),
           ),
@@ -139,16 +143,18 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
   }
 
   Widget _buildErrorState() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.error_outline,
               size: 80,
-              color: Colors.red,
+              color: colorScheme.error,
             ),
             const SizedBox(height: 16),
             Text(
@@ -167,8 +173,8 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
               icon: const Icon(Icons.arrow_back),
               label: const Text('Try Again'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xffEEC6BA),
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.softPink,
+                foregroundColor: AppColors.darkPink,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 12,
@@ -186,20 +192,11 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image section
           _buildImageSection(),
-
-          // Success message
           _buildSuccessMessage(),
-
           const SizedBox(height: 5),
-
-          // Analysis results
           _buildAnalysisResults(),
-
           const SizedBox(height: 5),
-
-          // Recommendations
           _buildRecommendations(),
         ],
       ),
@@ -213,12 +210,12 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: AppColors.darkWarm.withOpacity(0.15),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.darkWarm.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -232,14 +229,11 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
           height: 350,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            // Fallback if image fails to load
             return Container(
               width: double.infinity,
               height: 350,
-              color: Colors.grey[200],
-              child: const Center(
-                child: Icon(Icons.image, size: 80, color: Colors.grey),
-              ),
+              color: AppColors.lightMint,
+              child: Icon(Icons.image, size: 80, color: AppColors.lavender),
             );
           },
         ),
@@ -253,12 +247,12 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xffE8F5E9), // Light green background
+        color: AppColors.lightMint,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xffC8E6C9), width: 2),
+        border: Border.all(color: AppColors.mintTeal, width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.darkWarm.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -269,12 +263,12 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xff4CAF50),
+              color: AppColors.mintTeal,
               borderRadius: BorderRadius.circular(50),
             ),
             child: const Icon(
               Icons.check_circle,
-              color: Colors.white,
+              color: AppColors.lightPeach,
               size: 24,
             ),
           ),
@@ -286,7 +280,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
                 Text(
                   'Analysis Complete',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: const Color(0xff2E7D32),
+                        color: AppColors.darkTeal,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
@@ -294,7 +288,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
                 Text(
                   'Your skin has been analyzed successfully',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: const Color(0xff66BB6A),
+                        color: AppColors.darkTeal,
                         fontWeight: FontWeight.w500,
                       ),
                 ),
@@ -328,7 +322,8 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
             title: 'Skin Type',
             value: _result!.skinType,
             confidence: _result!.confidence.skinTypeConfidencePercentage,
-            color: Colors.blue,
+            color: AppColors.mintTeal,
+            darkColor: AppColors.darkTeal,
           ),
 
           const SizedBox(height: 12),
@@ -339,7 +334,8 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
             title: 'Concern',
             value: _result!.concern,
             confidence: _result!.confidence.concernConfidencePercentage,
-            color: Colors.orange,
+            color: AppColors.mauve,
+            darkColor: AppColors.darkMauve,
           ),
         ],
       ),
@@ -352,16 +348,17 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
     required String value,
     required String confidence,
     required Color color,
+    required Color darkColor,
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.lightPeach,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+        border: Border.all(color: color.withOpacity(0.4), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.darkWarm.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -375,7 +372,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
               color: color,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: Colors.white, size: 24),
+            child: Icon(icon, color: AppColors.lightPeach, size: 24),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -385,7 +382,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
                 Text(
                   title,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: const Color(0xff8D6E63),
+                        color: darkColor,
                         fontWeight: FontWeight.w500,
                         fontSize: 12,
                       ),
@@ -395,7 +392,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
                   value,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: const Color(0xff5D4037),
+                        color: AppColors.darkWarm,
                       ),
                 ),
               ],
@@ -410,7 +407,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
             child: Text(
               '$confidence%',
               style: TextStyle(
-                color: color,
+                color: darkColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 13,
               ),
@@ -456,6 +453,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
+      color: AppColors.lightPeach,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -470,12 +468,12 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: const Color(0xffEEC6BA).withOpacity(0.2),
+                  color: AppColors.lightMint,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
                   Icons.shopping_bag,
-                  color: Color(0xff8D6E63),
+                  color: AppColors.darkTeal,
                   size: 30,
                 ),
               ),
@@ -501,10 +499,10 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xffF0E8E6),
+                            color: AppColors.lightLavender,
                             borderRadius: BorderRadius.circular(6),
                             border: Border.all(
-                              color: const Color(0xffD7CCC8),
+                              color: AppColors.lavender,
                               width: 1,
                             ),
                           ),
@@ -512,7 +510,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
                             product.productType,
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: const Color(0xff8D6E63),
+                                      color: AppColors.darkLavender,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 11,
                                     ),
@@ -525,7 +523,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xffEEC6BA),
+                            color: AppColors.softPink,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -534,7 +532,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
                                 .textTheme
                                 .titleSmall
                                 ?.copyWith(
-                                  color: const Color(0xff5D4037),
+                                  color: AppColors.darkPink,
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
@@ -546,9 +544,9 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
               ),
               IconButton(
                 onPressed: () => _openProductUrl(product.productUrl),
-                icon: const Icon(
+                icon: Icon(
                   Icons.open_in_new,
-                  color: Color(0xff8D6E63),
+                  color: AppColors.darkTeal,
                 ),
                 tooltip: 'Open product',
               ),

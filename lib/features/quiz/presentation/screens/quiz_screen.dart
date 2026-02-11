@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../Data/Model/User/user.model.dart';
 import '../../../../Data/Model/User/users_enums.dart';
 import '../../../../Data/Repositories/user.repo.dart';
+import '../../../../app_colors.dart';
 import '../../../../core/Services/Auth/auth.service.dart';
 import '../../../../core/Services/Auth/src/Providers/auth_provider.dart';
 import '../../../../core/widgets/primary_button.dart';
@@ -100,29 +101,28 @@ class _QuizScreenState extends State<QuizScreen> {
             (route) => false,
           );
         } else {
-          // Handle case where user model is null
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to load user data. Please try again.'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content:
+                  const Text('Failed to load user data. Please try again.'),
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
       } else {
-        // Handle case where user is not authenticated
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('You must be logged in to complete the quiz.'),
-            backgroundColor: Colors.red,
+          SnackBar(
+            content:
+                const Text('You must be logged in to complete the quiz.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
     } catch (e) {
-      // Handle any errors
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error submitting quiz: ${e.toString()}'),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -135,6 +135,7 @@ class _QuizScreenState extends State<QuizScreen> {
     required VoidCallback onTap,
   }) {
     final isSelected = value == selectedValue;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTap: onTap,
@@ -143,18 +144,19 @@ class _QuizScreenState extends State<QuizScreen> {
         margin: const EdgeInsets.symmetric(vertical: 6),
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isSelected ? AppColors.lightMint : AppColors.lightPeach,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Colors.transparent,
+            color: isSelected ? colorScheme.primary : Colors.transparent,
             width: 2,
           ),
         ),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 16),
+          style: TextStyle(
+            fontSize: 16,
+            color: isSelected ? AppColors.darkTeal : colorScheme.onSurface,
+          ),
         ),
       ),
     );
@@ -171,10 +173,22 @@ class _QuizScreenState extends State<QuizScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
-          const Text("Let’s Get to Know Your Skin",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(
+            "Let's Get to Know Your Skin",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 24),
-          Text(question, style: const TextStyle(fontSize: 16)),
+          Text(
+            question,
+            style: TextStyle(
+              fontSize: 16,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 16),
           ...options,
           if (showTextField)
@@ -183,9 +197,9 @@ class _QuizScreenState extends State<QuizScreen> {
               child: TextField(
                 controller: _allergyController,
                 decoration: InputDecoration(
-                  hintText: "what’s your allergies ?",
+                  hintText: "what's your allergies ?",
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: AppColors.lightPeach,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none),
@@ -210,7 +224,7 @@ class _QuizScreenState extends State<QuizScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5EDE8),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: PageView(
           controller: _pageController,

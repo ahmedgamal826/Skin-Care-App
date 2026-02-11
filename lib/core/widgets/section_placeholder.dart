@@ -18,15 +18,7 @@ class SectionPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //SECTION - Build Setup
-    //t2 -Values
-    //double w = MediaQuery.of(context).size.width;
-    //double h = MediaQuery.of(context).size.height;
-    //t2 -Values
-    //
-    //t2 -Widgets
-    //t2 -Widgets
-    //!SECTION
+    final colorScheme = Theme.of(context).colorScheme;
 
     //SECTION - Build Return
     return Container(
@@ -35,7 +27,7 @@ class SectionPlaceholder extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: ShapeDecoration(
         shape: RoundedRectangleBorder(
-          side: const BorderSide(width: 2, color: Color(0xFFE0E0E0)),
+          side: BorderSide(width: 2, color: colorScheme.outlineVariant),
           borderRadius: BorderRadius.circular(8),
         ),
       ),
@@ -43,11 +35,11 @@ class SectionPlaceholder extends StatelessWidget {
         title,
         softWrap: true,
         textAlign: TextAlign.center,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
-          fontFamily: 'SF Pro Text',
           fontWeight: FontWeight.w400,
           letterSpacing: -0.24,
+          color: colorScheme.onSurface,
         ),
       ),
     );

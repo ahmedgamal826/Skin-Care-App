@@ -2,6 +2,7 @@ import 'dart:convert';
 
 // import 'package:cloud_firestore/cloud_firestore.dart'; // Removed Firebase
 import 'package:flutter/material.dart';
+import '../../../app_colors.dart';
 
 class SensorData {
   final String id;
@@ -60,8 +61,8 @@ class SensorData {
       SensorData.fromMap(json.decode(source) as Map<String, dynamic>);
 
   static Color _getColor(double level) {
-    if (level < 200) return Colors.green;
-    if (level < 500) return Colors.orange;
-    return Colors.red;
+    if (level < 200) return AppColors.mintTeal;
+    if (level < 500) return AppColors.mauve;
+    return AppColors.softPink;
   }
 }
