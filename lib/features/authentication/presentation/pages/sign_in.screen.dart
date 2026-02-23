@@ -7,6 +7,7 @@ import '../../../../core/Services/Auth/auth.service.dart';
 import '../../../../core/Services/Auth/models/auth.model.dart';
 import '../../../../core/Services/Auth/src/Providers/auth_provider.dart';
 import '../../../../core/Services/Auth/src/Providers/firebase/methods/email_auth_method.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/SnackBar/snackbar.helper.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/widgets/tertiary_button.dart';
@@ -41,11 +42,12 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Login to your Account',
+        title: Text(
+          loc.translate('login_to_account'),
         ),
       ),
       body: SingleChildScrollView(
@@ -58,7 +60,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Log in to continue your journey',
+                    loc.translate('login_continue_journey'),
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(
@@ -66,19 +68,19 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(
-                      hintText: "exa@example.com",
-                      labelText: "Email",
+                    decoration: InputDecoration(
+                      hintText: loc.translate('email_hint'),
+                      labelText: loc.translate('email'),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
+                        return loc.translate('please_enter_email');
                       }
                       String pattern =
                           r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
                       RegExp regex = RegExp(pattern);
                       if (!regex.hasMatch(value)) {
-                        return 'Please enter a valid email';
+                        return loc.translate('please_enter_valid_email');
                       }
                       return null;
                     },
@@ -91,8 +93,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      hintText: "Password",
-                      labelText: "Password",
+                      hintText: loc.translate('password_hint'),
+                      labelText: loc.translate('password'),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
@@ -111,7 +113,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TertiaryButton(
-                      title: "Forgot Password?",
+                      title: loc.translate('forgot_password'),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -165,13 +167,15 @@ class _SignInScreenState extends State<SignInScreen> {
                                   } else {
                                     SnackbarHelper.showError(
                                       context,
-                                      title: "Invalid email or password",
+                                      title: loc.translate(
+                                          'invalid_email_or_password'),
                                     );
                                   }
                                 } catch (e) {
                                   SnackbarHelper.showError(
                                     context,
-                                    title: "Sign in failed: ${e.toString()}",
+                                    title:
+                                        "${loc.translate('sign_in_failed')}: ${e.toString()}",
                                   );
                                 } finally {
                                   if (mounted) {
@@ -182,7 +186,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 }
                               }
                             },
-                      title: _isLoading ? "" : "Login",
+                      title: _isLoading ? "" : loc.translate('login'),
                       child: _isLoading
                           ? SizedBox(
                               width: 20,
@@ -210,13 +214,13 @@ class _SignInScreenState extends State<SignInScreen> {
                       },
                       child: Text.rich(
                         TextSpan(
-                          text: 'Already have an account? ',
+                          text: loc.translate('already_have_account'),
                           style: TextStyle(
                             color: colorScheme.onSurfaceVariant,
                           ),
                           children: <InlineSpan>[
                             TextSpan(
-                              text: 'Sign Up',
+                              text: loc.translate('sign_up_link'),
                               style: TextStyle(
                                 color: colorScheme.tertiary,
                               ),

@@ -8,6 +8,7 @@ import '../../../../Data/Repositories/user.repo.dart';
 import '../../../../app_colors.dart';
 import '../../../../core/Services/Auth/auth.service.dart';
 import '../../../../core/Services/Auth/src/Providers/auth_provider.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../home/presentation/pages/home.screen.dart';
 
@@ -68,6 +69,7 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Future<void> submit() async {
+    final loc = AppLocalizations.of(context);
     try {
       String? userId = AuthService(
         authProvider: FirebaseAuthProvider(firebaseAuth: FirebaseAuth.instance),
@@ -103,8 +105,7 @@ class _QuizScreenState extends State<QuizScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content:
-                  const Text('Failed to load user data. Please try again.'),
+              content: Text(loc.translate('failed_load_user')),
               backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
@@ -112,8 +113,7 @@ class _QuizScreenState extends State<QuizScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content:
-                const Text('You must be logged in to complete the quiz.'),
+            content: Text(loc.translate('must_login_quiz')),
             backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
@@ -121,7 +121,8 @@ class _QuizScreenState extends State<QuizScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error submitting quiz: ${e.toString()}'),
+          content: Text(
+              '${loc.translate('error_submitting_quiz')}: ${e.toString()}'),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -167,6 +168,7 @@ class _QuizScreenState extends State<QuizScreen> {
     required List<Widget> options,
     bool showTextField = false,
   }) {
+    final loc = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -174,7 +176,7 @@ class _QuizScreenState extends State<QuizScreen> {
         children: [
           const SizedBox(height: 16),
           Text(
-            "Let's Get to Know Your Skin",
+            loc.translate('get_to_know_skin'),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -197,7 +199,7 @@ class _QuizScreenState extends State<QuizScreen> {
               child: TextField(
                 controller: _allergyController,
                 decoration: InputDecoration(
-                  hintText: "what's your allergies ?",
+                  hintText: loc.translate('whats_allergies'),
                   filled: true,
                   fillColor: AppColors.lightPeach,
                   border: OutlineInputBorder(
@@ -211,7 +213,9 @@ class _QuizScreenState extends State<QuizScreen> {
           SizedBox(
             width: double.infinity,
             child: PrimaryButton(
-              title: _currentPage == 5 ? "Submit" : "Next",
+              title: _currentPage == 5
+                  ? loc.translate('submit')
+                  : loc.translate('next'),
               onPressed:
                   canProceed ? (_currentPage == 5 ? submit : nextPage) : null,
             ),
@@ -223,6 +227,8 @@ class _QuizScreenState extends State<QuizScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
@@ -232,7 +238,7 @@ class _QuizScreenState extends State<QuizScreen> {
           children: [
             // Page 1 - Skin Type
             buildPage(
-              question: "What is your skin type?",
+              question: loc.translate('what_skin_type'),
               options: SkinType.values.map((e) {
                 return buildOptionTile<SkinType>(
                   text: e.name,
@@ -247,7 +253,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
             // Page 2 - Climate
             buildPage(
-              question: "How would you describe the climate in your area?",
+              question: loc.translate('describe_climate'),
               options: ClimateType.values.map((e) {
                 return buildOptionTile<ClimateType>(
                   text: e.name,
@@ -262,10 +268,10 @@ class _QuizScreenState extends State<QuizScreen> {
 
             // Page 3 - Allergies
             buildPage(
-              question: "Do you have allergies to any skincare ingredients?",
+              question: loc.translate('have_allergies'),
               options: [
                 buildOptionTile<bool>(
-                  text: "Yes",
+                  text: loc.translate('yes'),
                   value: true,
                   selectedValue: hasAllergies,
                   onTap: () {
@@ -273,7 +279,7 @@ class _QuizScreenState extends State<QuizScreen> {
                   },
                 ),
                 buildOptionTile<bool>(
-                  text: "No",
+                  text: loc.translate('no'),
                   value: false,
                   selectedValue: hasAllergies,
                   onTap: () {
@@ -290,7 +296,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
             // Page 4 - Skincare Frequency
             buildPage(
-              question: "How often do you take care of your skin?",
+              question: loc.translate('how_often_skincare'),
               options: SkincareFrequency.values.map((e) {
                 return buildOptionTile<SkincareFrequency>(
                   text: e.name,
@@ -305,8 +311,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
             // Page 5 - Skincare Priority
             buildPage(
-              question:
-                  "What is the most important thing you look for in skincare products?",
+              question: loc.translate('important_skincare'),
               options: SkincarePriority.values.map((e) {
                 return buildOptionTile<SkincarePriority>(
                   text: e.name,
@@ -321,7 +326,7 @@ class _QuizScreenState extends State<QuizScreen> {
 
             // Page 6 - Sunscreen Usage
             buildPage(
-              question: "Do you use sunscreen daily?",
+              question: loc.translate('use_sunscreen_daily'),
               options: SunscreenUsage.values.map((e) {
                 return buildOptionTile<SunscreenUsage>(
                   text: e.name,

@@ -10,6 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   ## Presentation
   flutter_svg: ^2.0.5
@@ -71,3 +73,4 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/lang/

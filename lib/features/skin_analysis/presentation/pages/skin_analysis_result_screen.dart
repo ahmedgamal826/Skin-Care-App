@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../app_colors.dart';
 import '../../../../core/Services/API/skin_care_api_service.dart';
+import '../../../../core/localization/app_localizations.dart';
 
 class SkinAnalysisResultScreen extends StatefulWidget {
   final XFile imageFile;
@@ -59,6 +60,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
   }
 
   Future<void> _openProductUrl(String url) async {
+    final loc = AppLocalizations.of(context);
     try {
       final uri = Uri.tryParse(url) ?? Uri.parse(url.replaceAll(' ', '%20'));
 
@@ -69,7 +71,9 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cannot open link: $url')),
+          SnackBar(
+              content:
+                  Text('${loc.translate('cannot_open_link')}: $url')),
         );
       }
     }
@@ -78,11 +82,12 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Skin Analysis'),
+        title: Text(loc.translate('skin_analysis')),
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
@@ -108,10 +113,12 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
       return _buildResultState();
     }
 
-    return const Center(child: Text('Unknown state'));
+    final loc = AppLocalizations.of(context);
+    return Center(child: Text(loc.translate('unknown_state')));
   }
 
   Widget _buildLoadingState() {
+    final loc = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -123,7 +130,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
           ),
           const SizedBox(height: 24),
           Text(
-            'Analyzing your skin...',
+            loc.translate('analyzing_your_skin'),
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: AppColors.darkTeal,
                   fontWeight: FontWeight.bold,
@@ -131,7 +138,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Please wait while we analyze your photo',
+            loc.translate('wait_analyze_photo'),
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.darkLavender,
                   fontWeight: FontWeight.w500,
@@ -144,6 +151,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
 
   Widget _buildErrorState() {
     final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context);
 
     return Center(
       child: Padding(
@@ -158,12 +166,12 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Analysis Failed',
+              loc.translate('analysis_failed'),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
             Text(
-              _errorMessage ?? 'An error occurred',
+              _errorMessage ?? loc.translate('error_occurred'),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
@@ -171,7 +179,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
             ElevatedButton.icon(
               onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.arrow_back),
-              label: const Text('Try Again'),
+              label: Text(loc.translate('try_again')),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.softPink,
                 foregroundColor: AppColors.darkPink,
@@ -242,6 +250,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
   }
 
   Widget _buildSuccessMessage() {
+    final loc = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
@@ -278,7 +287,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Analysis Complete',
+                  loc.translate('analysis_complete'),
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: AppColors.darkTeal,
                         fontWeight: FontWeight.bold,
@@ -286,7 +295,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Your skin has been analyzed successfully',
+                  loc.translate('skin_analyzed_success'),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.darkTeal,
                         fontWeight: FontWeight.w500,
@@ -303,13 +312,15 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
   Widget _buildAnalysisResults() {
     if (_result == null) return const SizedBox.shrink();
 
+    final loc = AppLocalizations.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Analysis Results',
+            loc.translate('analysis_results'),
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -319,7 +330,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
           // Skin type card
           _buildInfoCard(
             icon: Icons.face,
-            title: 'Skin Type',
+            title: loc.translate('skin_type'),
             value: _result!.skinType,
             confidence: _result!.confidence.skinTypeConfidencePercentage,
             color: AppColors.mintTeal,
@@ -331,7 +342,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
           // Concern card
           _buildInfoCard(
             icon: Icons.visibility,
-            title: 'Concern',
+            title: loc.translate('concern'),
             value: _result!.concern,
             confidence: _result!.confidence.concernConfidencePercentage,
             color: AppColors.mauve,
@@ -423,6 +434,8 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
       return const SizedBox.shrink();
     }
 
+    final loc = AppLocalizations.of(context);
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -431,7 +444,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
           Row(
             children: [
               Text(
-                'Recommended Products',
+                loc.translate('recommended_products'),
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -450,6 +463,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
   }
 
   Widget _buildProductCard(ProductRecommendation product) {
+    final loc = AppLocalizations.of(context);
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -548,7 +562,7 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
                   Icons.open_in_new,
                   color: AppColors.darkTeal,
                 ),
-                tooltip: 'Open product',
+                tooltip: loc.translate('open_product'),
               ),
             ],
           ),

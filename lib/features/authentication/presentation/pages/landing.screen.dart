@@ -1,6 +1,7 @@
 //t2 Core Packages Imports
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/widgets/secondary_button.dart';
 import 'sign_in.screen.dart';
@@ -23,20 +24,14 @@ class LandingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //SECTION - Build Setup
-    //t2 -Values
-    //t2 -Values
-    //
-    //t2 -Widgets
-    //t2 -Widgets
+    final loc = AppLocalizations.of(context);
     //!SECTION
 
     //SECTION - Build Return
     return Scaffold(
-      // backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
-          // mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
@@ -47,13 +42,13 @@ class LandingScreen extends StatelessWidget {
             const SizedBox(height: 16),
             Text.rich(
               TextSpan(
-                text: 'Welcome to ',
+                text: loc.translate('welcome_to'),
                 style: Theme.of(context).textTheme.displaySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                 children: <InlineSpan>[
                   TextSpan(
-                    text: 'Glowify',
+                    text: loc.translate('glowify'),
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
                           color: Theme.of(context).colorScheme.tertiary,
                         ),
@@ -63,7 +58,7 @@ class LandingScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              "your ultimate skincare companion!  Discover personalized skincare routines, expert tips, and the best products tailored just for you.",
+              loc.translate('landing_description'),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge,
             )
@@ -78,7 +73,7 @@ class LandingScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: PrimaryButton(
-                title: "Sign in",
+                title: loc.translate('sign_in'),
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -93,7 +88,7 @@ class LandingScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: SecondaryButton(
-                title: "Sign up",
+                title: loc.translate('sign_up'),
                 onPressed: () {
                   Navigator.push(
                     context,

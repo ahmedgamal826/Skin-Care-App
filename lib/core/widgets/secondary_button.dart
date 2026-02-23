@@ -1,6 +1,8 @@
 //t2 Core Packages Imports
 import 'package:flutter/material.dart';
 
+import '../../app_colors.dart';
+
 //t2 Dependancies Imports
 //t3 Services
 //t3 Models
@@ -22,35 +24,26 @@ class SecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //SECTION - Build Setup
-    //t2 -Values
-    //double w = MediaQuery.of(context).size.width;
-    //double h = MediaQuery.of(context).size.height;
-    //t2 -Values
-    //
-    //t2 -Widgets
-    //t2 -Widgets
-    //!SECTION
-
     //SECTION - Build Return
-    return ElevatedButton(
+    return OutlinedButton(
       onPressed: () => onPressed(),
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        side: const BorderSide(
+          color: AppColors.darkWarm,
+          width: 1.5,
+        ),
         shape: RoundedRectangleBorder(
-          side:  BorderSide(
-            strokeAlign: BorderSide.strokeAlignCenter,
-            color: Theme.of(context).colorScheme.primary,
-          ),
           borderRadius: BorderRadius.circular(100),
         ),
       ),
       child: Text(
         title,
         textAlign: TextAlign.center,
-        style:  const TextStyle(
-
-          fontWeight: FontWeight.w500,
+        style: const TextStyle(
+          color: AppColors.darkWarm,
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
         ),
       ),
     );

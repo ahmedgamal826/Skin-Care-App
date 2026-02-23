@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../Data/Model/User/user.model.dart';
 import '../../../../app_colors.dart';
 import '../../../../core/Services/API/skin_care_api_service.dart';
+import '../../../../core/localization/app_localizations.dart';
+import '../../../../main.dart';
 import '../../../profile/presentation/pages/profile.screen.dart';
 import '../../../skin_analysis/presentation/pages/skin_analysis_result_screen.dart';
 
@@ -111,16 +113,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
         backgroundColor: colorScheme.surface,
         title: Text(
-          'Welcome back 👋',
+          loc.translate('welcome_back'),
           style: TextStyle(color: colorScheme.onSurface),
         ),
         actions: [
+          // ─── Language Toggle Button ───────────────────────────
+          _buildLanguageToggle(colorScheme),
           IconButton(
             icon: Icon(
               Icons.person_2_outlined,
@@ -160,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         TextSpan(
                           children: [
                             TextSpan(
-                              text: "Find the right\n",
+                              text: loc.translate('find_right_product'),
                               style: Theme.of(context)
                                   .textTheme
                                   .titleLarge
@@ -169,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                             ),
                             TextSpan(
-                              text: "product for your skin",
+                              text: loc.translate('product_for_skin'),
                               style: Theme.of(context)
                                   .textTheme
                                   .headlineLarge
@@ -214,8 +219,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     Expanded(
                       child: Text(
                         serverConnected
-                            ? 'Server Connected - Ready for Analysis'
-                            : 'Server Disconnected - Make sure Flask API is running',
+                            ? loc.translate('server_connected')
+                            : loc.translate('server_disconnected'),
                         style: TextStyle(
                           color: serverConnected
                               ? AppColors.darkTeal
@@ -227,8 +232,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     TextButton(
                       onPressed: _checkServerStatus,
                       child: Text(
-                        'Recheck',
-                        style: TextStyle(color: Colors.black),
+                        loc.translate('recheck'),
+                        style: const TextStyle(color: Colors.black),
                       ),
                     ),
                   ],
@@ -268,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          "Scan your face with AI",
+                          loc.translate('scan_face_ai'),
                           style: TextStyle(color: colorScheme.onSurface),
                         ),
                       ),
@@ -293,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Analyzing skin...',
+                        loc.translate('analyzing_skin'),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -305,6 +310,45 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Builds a language toggle button for the AppBar.
+  Widget _buildLanguageToggle(ColorScheme colorScheme) {
+    final isArabic = localeProvider.isArabic;
+
+    return GestureDetector(
+      onTap: () {
+        localeProvider.toggleLocale();
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: AppColors.lightMint,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppColors.mintTeal, width: 1.5),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.language,
+              size: 18,
+              color: AppColors.darkTeal,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              isArabic ? 'EN' : 'AR',
+              style: const TextStyle(
+                color: AppColors.darkTeal,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+            ),
+          ],
         ),
       ),
     );

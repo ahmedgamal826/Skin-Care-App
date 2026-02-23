@@ -7,6 +7,7 @@ import '../../../../Data/Repositories/user.repo.dart';
 import '../../../../app_colors.dart';
 import '../../../../core/Services/Auth/auth.service.dart';
 import '../../../../core/Services/Auth/src/Providers/auth_provider.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/SnackBar/snackbar.helper.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/widgets/section_title.dart';
@@ -93,9 +94,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           setState(() {
             isLoading = false;
           });
+          final loc = AppLocalizations.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('You must be logged in to view profile'),
+              content: Text(loc.translate('must_login_profile')),
               backgroundColor: AppColors.mauve,
             ),
           );
@@ -108,9 +110,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           isLoading = false;
         });
+        final loc = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading profile: ${e.toString()}'),
+            content: Text(
+                '${loc.translate('error_loading_profile')}: ${e.toString()}'),
             backgroundColor: Theme.of(context).colorScheme.error,
             duration: const Duration(seconds: 5),
           ),
@@ -122,12 +126,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context);
 
     if (isLoading) {
       return Scaffold(
         backgroundColor: colorScheme.surface,
         appBar: AppBar(
-          title: const Text("Profile"),
+          title: Text(loc.translate('profile')),
           centerTitle: true,
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -141,7 +146,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: const Text("Profile"),
+        title: Text(loc.translate('profile')),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -149,7 +154,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           IconButton(
             onPressed: _loadUserData,
             icon: const Icon(Icons.refresh),
-            tooltip: 'Refresh Profile',
+            tooltip: loc.translate('refresh_profile'),
           ),
           TextButton(
             onPressed: () {
@@ -164,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               );
             },
             child: Text(
-              'Sign Out',
+              loc.translate('sign_out'),
               style: TextStyle(
                 color: colorScheme.error,
               ),
@@ -180,18 +185,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    const SectionTitle(title: "Account Info"),
+                    SectionTitle(title: loc.translate('account_info')),
                     const SizedBox(height: 16),
-                    _buildTextField(nameController, "Name"),
+                    _buildTextField(
+                        nameController, loc.translate('name')),
                     const SizedBox(height: 16),
-                    _buildTextField(emailController, "Email", readOnly: true),
+                    _buildTextField(
+                        emailController, loc.translate('email'),
+                        readOnly: true),
                     const SizedBox(height: 16),
-                    _buildTextField(phoneController, "Phone Number"),
+                    _buildTextField(
+                        phoneController, loc.translate('phone_number')),
                     const SizedBox(height: 32),
-                    const SectionTitle(title: "Skincare Profile"),
+                    SectionTitle(title: loc.translate('skincare_profile')),
                     const SizedBox(height: 16),
                     _buildDropdown<SkinType>(
-                      label: "Skin Type",
+                      label: loc.translate('skin_type'),
                       value: selectedSkinType,
                       items: SkinType.values,
                       itemToString: (e) =>
@@ -200,7 +209,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           setState(() => selectedSkinType = val),
                     ),
                     _buildDropdown<ClimateType>(
-                      label: "Climate in your area",
+                      label: loc.translate('climate_area'),
                       value: selectedClimate,
                       items: ClimateType.values,
                       itemToString: (e) =>
@@ -209,7 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     Row(
                       children: [
-                        const Text("Allergies to skincare?"),
+                        Text(loc.translate('allergies_skincare')),
                         const Spacer(),
                         Switch(
                           inactiveThumbColor: Colors.white,
@@ -222,15 +231,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     if (hasAllergies)
                       Column(
                         children: [
-                          _buildTextField(
-                              allergyController, "Allergy Description"),
+                          _buildTextField(allergyController,
+                              loc.translate('allergy_description')),
                           const SizedBox(
                             height: 16,
                           ),
                         ],
                       ),
                     _buildDropdown<SkincareFrequency>(
-                      label: "Skincare Frequency",
+                      label: loc.translate('skincare_frequency'),
                       value: selectedFrequency,
                       items: SkincareFrequency.values,
                       itemToString: (e) =>
@@ -239,7 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           setState(() => selectedFrequency = val),
                     ),
                     _buildDropdown<SkincarePriority>(
-                      label: "Skincare Priority",
+                      label: loc.translate('skincare_priority'),
                       value: selectedPriority,
                       items: SkincarePriority.values,
                       itemToString: (e) =>
@@ -248,7 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           setState(() => selectedPriority = val),
                     ),
                     _buildDropdown<SunscreenUsage>(
-                      label: "Do you use sunscreen?",
+                      label: loc.translate('use_sunscreen'),
                       value: selectedSunscreen,
                       items: SunscreenUsage.values,
                       itemToString: (e) =>
@@ -260,7 +269,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: PrimaryButton(
-                        title: "Save",
+                        title: loc.translate('save'),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             appUser?.name = nameController.text;
@@ -278,7 +287,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 'Users', appUser!.id, appUser!.toMap());
                             SnackbarHelper.showTemplated(
                               context,
-                              title: "Profile updated successfully!",
+                              title: loc.translate('profile_updated'),
                             );
                           }
                         },
@@ -294,6 +303,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildTextField(TextEditingController controller, String label,
       {bool readOnly = false}) {
+    final loc = AppLocalizations.of(context);
     return TextFormField(
       controller: controller,
       readOnly: readOnly,
@@ -306,7 +316,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       validator: (val) {
         if (!readOnly && (val == null || val.isEmpty)) {
-          return '$label cannot be empty';
+          return '$label ${loc.translate('cannot_be_empty')}';
         }
         return null;
       },
@@ -320,6 +330,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String Function(T) itemToString,
     required void Function(T?) onChanged,
   }) {
+    final loc = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -345,7 +356,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             )
             .toList(),
         onChanged: onChanged,
-        validator: (val) => val == null ? 'Please select $label' : null,
+        validator: (val) =>
+            val == null ? '${loc.translate('please_select')} $label' : null,
       ),
     );
   }

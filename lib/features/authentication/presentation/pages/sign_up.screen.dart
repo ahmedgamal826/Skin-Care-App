@@ -8,6 +8,7 @@ import '../../../../Data/Repositories/user.repo.dart';
 import '../../../../core/Services/Auth/auth.service.dart';
 import '../../../../core/Services/Auth/models/auth.model.dart';
 import '../../../../core/Services/Auth/src/Providers/auth_provider.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/SnackBar/snackbar.helper.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../quiz/presentation/screens/quiz_screen.dart';
@@ -61,11 +62,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Create Account',
+        title: Text(
+          loc.translate('create_account'),
         ),
       ),
       body: SingleChildScrollView(
@@ -78,7 +80,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Healthy skin starts here',
+                    loc.translate('healthy_skin_starts'),
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(
@@ -86,17 +88,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(
-                      hintText: "exa@example.com",
-                      labelText: "Email",
+                    decoration: InputDecoration(
+                      hintText: loc.translate('email_hint'),
+                      labelText: loc.translate('email'),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
+                        return loc.translate('please_enter_email');
                       }
                       final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
                       if (!emailRegex.hasMatch(value)) {
-                        return 'Please enter a valid email address';
+                        return loc
+                            .translate('please_enter_valid_email_address');
                       }
                       return null;
                     },
@@ -107,8 +110,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     controller: _passwordController,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      hintText: "Enter Your Password",
-                      labelText: "Password",
+                      hintText: loc.translate('enter_password'),
+                      labelText: loc.translate('password'),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
@@ -135,17 +138,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'The password cannot be empty';
+                        return loc.translate('password_empty');
                       } else if (!hasMinLength) {
-                        return 'The password must be at least 8 characters long';
+                        return loc.translate('password_min_length');
                       } else if (!hasUpperCase) {
-                        return 'The password must contain at least one uppercase letter';
+                        return loc.translate('password_uppercase');
                       } else if (!hasLowerCase) {
-                        return 'The password must contain at least one lowercase letter';
+                        return loc.translate('password_lowercase');
                       } else if (!hasNumber) {
-                        return 'The password must contain at least one number';
+                        return loc.translate('password_number');
                       } else if (!hasSpecialChar) {
-                        return 'The password must contain at least one special character';
+                        return loc.translate('password_special_char');
                       }
                       return null;
                     },
@@ -155,15 +158,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   TextFormField(
                     controller: _fNameController,
-                    decoration: const InputDecoration(
-                      hintText: "Enter Your Name",
-                      labelText: "Name",
+                    decoration: InputDecoration(
+                      hintText: loc.translate('enter_name'),
+                      labelText: loc.translate('name'),
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'The name cannot be empty';
+                        return loc.translate('name_empty');
                       } else if (value.length < 3) {
-                        return 'The name must be at least 3 characters long';
+                        return loc.translate('name_min_length');
                       }
                       return null;
                     },
@@ -174,17 +177,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   TextFormField(
                     controller: _phoneNumberController,
-                    decoration: const InputDecoration(
-                      hintText: "Enter Your Phone Number",
-                      labelText: "mobile number",
+                    decoration: InputDecoration(
+                      hintText: loc.translate('enter_phone'),
+                      labelText: loc.translate('mobile_number'),
                     ),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your phone number';
+                        return loc.translate('please_enter_phone');
                       }
                       if (!RegExp(r'^\d{11}$').hasMatch(value)) {
-                        return 'Please enter a valid 11-digit phone number';
+                        return loc.translate('invalid_phone');
                       }
                       return null;
                     },
@@ -250,11 +253,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     );
                                   } else {
                                     SnackbarHelper.showError(context,
-                                        title: 'Failed to sign up');
+                                        title:
+                                            loc.translate('failed_sign_up'));
                                   }
                                 } catch (e) {
                                   SnackbarHelper.showError(context,
-                                      title: 'Sign up failed: ${e.toString()}');
+                                      title:
+                                          '${loc.translate('sign_up_failed')}: ${e.toString()}');
                                 } finally {
                                   if (mounted) {
                                     setState(() {
@@ -264,7 +269,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 }
                               }
                             },
-                      title: _isLoading ? "" : "Sign up",
+                      title:
+                          _isLoading ? "" : loc.translate('sign_up'),
                       child: _isLoading
                           ? SizedBox(
                               width: 20,
@@ -292,13 +298,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       },
                       child: Text.rich(
                         TextSpan(
-                          text: 'Already have an account? ',
+                          text: loc.translate('already_have_account_login'),
                           style: TextStyle(
                             color: colorScheme.onSurfaceVariant,
                           ),
                           children: <InlineSpan>[
                             TextSpan(
-                              text: 'Log in',
+                              text: loc.translate('log_in_link'),
                               style: TextStyle(
                                 color: colorScheme.tertiary,
                               ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/Services/Auth/auth.service.dart';
 import '../../../../core/Services/Auth/src/Providers/auth_provider.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/SnackBar/snackbar.helper.dart';
 import '../../../../core/widgets/primary_button.dart';
 
@@ -26,6 +27,7 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   void _resetPassword() async {
     final email = _emailController.text.trim();
+    final loc = AppLocalizations.of(context);
     print('🔄 Reset Password: Starting reset for email: $email');
 
     if (_formKey.currentState!.validate()) {
@@ -41,18 +43,18 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         if (result) {
           print('✅ Reset Password: Success! Email sent');
           SnackbarHelper.showTemplated(context,
-              title:
-                  'An email has been sent successfully to reset the password');
+              title: loc.translate('reset_email_sent'));
           Navigator.pop(context);
         } else {
           print('❌ Reset Password: Failed to send email');
           SnackbarHelper.showError(context,
-              title: "Failed to send an email to reset the password");
+              title: loc.translate('reset_email_failed'));
         }
       } catch (e) {
         print('💥 Reset Password: Error occurred: $e');
         SnackbarHelper.showError(context,
-            title: "Reset password failed: ${e.toString()}");
+            title:
+                "${loc.translate('reset_password_failed')}: ${e.toString()}");
       } finally {
         if (mounted) {
           setState(() {
@@ -68,9 +70,10 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Reset Password')),
+      appBar: AppBar(title: Text(loc.translate('reset_password'))),
       body: Form(
         key: _formKey,
         child: Padding(
@@ -79,19 +82,19 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             children: [
               TextFormField(
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  hintText: "exa@example.com",
-                  labelText: "Email",
+                decoration: InputDecoration(
+                  hintText: loc.translate('email_hint'),
+                  labelText: loc.translate('email'),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
+                    return loc.translate('please_enter_email');
                   }
                   String pattern =
                       r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
                   RegExp regex = RegExp(pattern);
                   if (!regex.hasMatch(value)) {
-                    return 'Please enter a valid email';
+                    return loc.translate('please_enter_valid_email');
                   }
                   return null;
                 },
@@ -107,7 +110,8 @@ class ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           width: double.infinity,
           child: PrimaryButton(
             onPressed: _isLoading ? null : _resetPassword,
-            title: _isLoading ? "" : 'Reset Password',
+            title:
+                _isLoading ? "" : loc.translate('reset_password'),
             child: _isLoading
                 ? SizedBox(
                     width: 20,
