@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 /// خدمة API للكشف عن سرطان الجلد
 class DiseaseDetectionApiService {
   static const String baseUrl =
-      "http://127.0.0.1:5000"; // URL الخاص بـ Flask API
+      "http://10.145.14.133:5000"; // URL الخاص بـ Flask API
 
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,

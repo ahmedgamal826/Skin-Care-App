@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 
 /// API service for skin analysis and recommendations
 class SkinCareApiService {
-  static const String baseUrl = "http://127.0.0.1:5000"; // Flask API URL
+  static const String baseUrl = "http://10.145.14.133:5000"; // Flask API URL
 
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
