@@ -1,11 +1,12 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// خدمة API للكشف عن سرطان الجلد
 class DiseaseDetectionApiService {
-  static const String baseUrl =
-      "http://10.145.14.133:5000"; // URL الخاص بـ Flask API
+  static const String baseUrl = String.fromEnvironment(
+    'FLASK_BASE_URL',
+    defaultValue: 'http://127.0.0.1:5000',
+  );
 
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
@@ -22,14 +23,13 @@ class DiseaseDetectionApiService {
     required XFile imageFile,
   }) async {
     try {
-      // تحويل XFile إلى File
-      final file = File(imageFile.path);
+      final imageBytes = await imageFile.readAsBytes();
 
       // إنشاء FormData للصورة
       final formData = FormData.fromMap({
-        'image': await MultipartFile.fromFile(
-          file.path,
-          filename: imageFile.name,
+        'image': MultipartFile.fromBytes(
+          imageBytes,
+          filename: imageFile.name.isNotEmpty ? imageFile.name : 'image.jpg',
         ),
       });
 

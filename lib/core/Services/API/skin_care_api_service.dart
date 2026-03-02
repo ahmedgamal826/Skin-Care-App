@@ -1,10 +1,12 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// API service for skin analysis and recommendations
 class SkinCareApiService {
-  static const String baseUrl = "http://10.145.14.133:5000"; // Flask API URL
+  static const String baseUrl = String.fromEnvironment(
+    'FLASK_BASE_URL',
+    defaultValue: 'http://127.0.0.1:5000',
+  );
 
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
@@ -61,14 +63,13 @@ class SkinCareApiService {
     required XFile imageFile,
   }) async {
     try {
-      // Convert XFile to File
-      final file = File(imageFile.path);
+      final imageBytes = await imageFile.readAsBytes();
 
       // Create FormData for image
       final formData = FormData.fromMap({
-        'image': await MultipartFile.fromFile(
-          file.path,
-          filename: imageFile.name,
+        'image': MultipartFile.fromBytes(
+          imageBytes,
+          filename: imageFile.name.isNotEmpty ? imageFile.name : 'image.jpg',
         ),
       });
 
@@ -212,14 +213,13 @@ class SkinCareApiService {
     required XFile imageFile,
   }) async {
     try {
-      // Convert XFile to File
-      final file = File(imageFile.path);
+      final imageBytes = await imageFile.readAsBytes();
 
       // Create FormData for image
       final formData = FormData.fromMap({
-        'image': await MultipartFile.fromFile(
-          file.path,
-          filename: imageFile.name,
+        'image': MultipartFile.fromBytes(
+          imageBytes,
+          filename: imageFile.name.isNotEmpty ? imageFile.name : 'image.jpg',
         ),
       });
 

@@ -29,78 +29,83 @@ class LandingScreen extends StatelessWidget {
 
     //SECTION - Build Return
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/images/banner.png',
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-            const SizedBox(height: 16),
-            Text.rich(
-              TextSpan(
-                text: loc.translate('welcome_to'),
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight - 48),
+              child: IntrinsicHeight(
+                child: Column(
+                  children: [
+                    Image.asset(
+                      'assets/images/banner.png',
+                      width: double.infinity,
+                      height: constraints.maxHeight * 0.42,
+                      fit: BoxFit.contain,
                     ),
-                children: <InlineSpan>[
-                  TextSpan(
-                    text: loc.translate('glowify'),
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.tertiary,
-                        ),
-                  )
-                ],
+                    const SizedBox(height: 16),
+                    Text.rich(
+                      TextSpan(
+                        text: loc.translate('welcome_to'),
+                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                        children: <InlineSpan>[
+                          TextSpan(
+                            text: loc.translate('glowify'),
+                            style:
+                                Theme.of(context).textTheme.displaySmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.tertiary,
+                                    ),
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      loc.translate('landing_description'),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const Spacer(),
+                    SizedBox(
+                      width: double.infinity,
+                      child: PrimaryButton(
+                        title: loc.translate('sign_in'),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                              builder: (BuildContext context) =>
+                                  const SignInScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: SecondaryButton(
+                        title: loc.translate('sign_up'),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute<void>(
+                              builder: (BuildContext context) =>
+                                  const SignUpScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              loc.translate('landing_description'),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge,
-            )
-          ],
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: double.infinity,
-              child: PrimaryButton(
-                title: loc.translate('sign_in'),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (BuildContext context) => const SignInScreen(),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: SecondaryButton(
-                title: loc.translate('sign_up'),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute<void>(
-                      builder: (BuildContext context) => const SignUpScreen(),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 26),
-          ],
+          ),
         ),
       ),
     );

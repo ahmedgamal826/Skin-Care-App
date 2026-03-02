@@ -8,28 +8,27 @@ import 'package:firebase_core/firebase_core.dart';
 import '../Error Handling/error_handling.service.dart';
 import '../Logging/logging.service.dart';
 //t3 Models
-import 'src/firebase_options.dart';
+import '../../../firebase_options.dart';
 //t1 Exports
 
 class FirebaseService {
-  static Future<FirebaseApp?> initialize() async {
-    FirebaseApp? app;
+  static Future<FirebaseApp> initialize() async {
     try {
-      // Check if Firebase is already initialized
-      try {
-        app = Firebase.app();
+      if (Firebase.apps.isNotEmpty) {
+        final app = Firebase.app();
         LoggingService.log("Firebase App already initialized: ${app.name}");
-      } catch (e) {
-        // Firebase not initialized, initialize it
-        app = await Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        );
-        LoggingService.log("Firebase App Initialized: ${app.name}");
+        return app;
       }
+
+      final app = await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      LoggingService.log("Firebase App Initialized: ${app.name}");
+      return app;
     } catch (e, s) {
       ErrorHandlingService.handle(e, 'FirebaseService/initialize',
           stackTrace: s);
+      rethrow;
     }
-    return app;
   }
 }

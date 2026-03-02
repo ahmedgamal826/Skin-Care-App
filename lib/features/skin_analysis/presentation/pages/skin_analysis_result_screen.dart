@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -231,17 +231,35 @@ class _SkinAnalysisResultScreenState extends State<SkinAnalysisResultScreen> {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Image.file(
-          File(widget.imageFile.path),
-          width: double.infinity,
-          height: 350,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
+        child: FutureBuilder<Uint8List>(
+          future: widget.imageFile.readAsBytes(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Image.memory(
+                snapshot.data!,
+                width: double.infinity,
+                height: 350,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: double.infinity,
+                    height: 350,
+                    color: AppColors.lightMint,
+                    child:
+                        Icon(Icons.image, size: 80, color: AppColors.lavender),
+                  );
+                },
+              );
+            }
+
             return Container(
               width: double.infinity,
               height: 350,
               color: AppColors.lightMint,
-              child: Icon(Icons.image, size: 80, color: AppColors.lavender),
+              alignment: Alignment.center,
+              child: CircularProgressIndicator(
+                color: AppColors.mintTeal,
+              ),
             );
           },
         ),

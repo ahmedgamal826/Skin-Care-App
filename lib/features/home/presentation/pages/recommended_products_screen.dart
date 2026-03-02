@@ -268,7 +268,7 @@
 // }
 
 // lib/skin_screen.dart
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../app_colors.dart';
@@ -276,7 +276,7 @@ import '../../../../core/Services/API/api_services_disease.dart';
 import '../../../../core/Services/API/api_service.dart';
 
 class RecommendedProductsScreen extends StatefulWidget {
-  final File imageFile;
+  final XFile imageFile;
   const RecommendedProductsScreen({super.key, required this.imageFile});
 
   @override
@@ -292,7 +292,7 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
       DiseaseDetectionApiService();
   final SkinApiClient _skinApiClient = SkinApiClient();
 
-  late File _image;
+  late XFile _image;
   String? _sessionId;
   bool _loading = false;
   final List<_Bubble> _messages = [];
@@ -335,9 +335,8 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
   Future<void> _analyze() async {
     setState(() => _loading = true);
     try {
-      final xFile = XFile(_image.path);
       final diseaseResult =
-          await _diseaseApiService.detectSkinDisease(imageFile: xFile);
+          await _diseaseApiService.detectSkinDisease(imageFile: _image);
 
       _sessionId = DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -406,7 +405,7 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
       setState(() => _loading = true);
 
       final analysisResult = await _skinApiClient.analyze(
-        imageFile: File(_image.path),
+        imageFile: _image,
         message: message,
       );
 
@@ -590,11 +589,26 @@ class _RecommendedProductsScreenState extends State<RecommendedProductsScreen>
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: Image.file(
-                _image,
-                height: 280,
-                width: double.infinity,
-                fit: BoxFit.cover,
+              child: FutureBuilder<Uint8List>(
+                future: _image.readAsBytes(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Image.memory(
+                      snapshot.data!,
+                      height: 280,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    );
+                  }
+
+                  return Container(
+                    height: 280,
+                    width: double.infinity,
+                    alignment: Alignment.center,
+                    color: AppColors.lightPeach,
+                    child: const CircularProgressIndicator(),
+                  );
+                },
               ),
             ),
           ),

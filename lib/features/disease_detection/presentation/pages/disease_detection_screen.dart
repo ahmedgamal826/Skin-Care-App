@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -48,10 +47,21 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
                 child: _selectedImage != null
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.file(
-                          File(_selectedImage!.path),
-                          fit: BoxFit.cover,
-                          width: double.infinity,
+                        child: FutureBuilder<Uint8List>(
+                          future: _selectedImage!.readAsBytes(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return Image.memory(
+                                snapshot.data!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                              );
+                            }
+
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
                         ),
                       )
                     : Center(
@@ -427,7 +437,7 @@ class _DiseaseDetectionScreenState extends State<DiseaseDetectionScreen> {
         context,
         MaterialPageRoute(
           builder: (context) => RecommendedProductsScreen(
-            imageFile: File(_selectedImage!.path),
+            imageFile: _selectedImage!,
           ),
         ),
       );

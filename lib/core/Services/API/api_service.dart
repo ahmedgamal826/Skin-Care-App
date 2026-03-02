@@ -1,10 +1,12 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SkinApiClient {
-  // بعد ما تعمل adb reverse
-  static const String baseUrl = "http://127.0.0.1:5001";
+  static const String baseUrl = String.fromEnvironment(
+    'FLASK_BASE_URL',
+    defaultValue: 'http://127.0.0.1:5000',
+  );
 
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
@@ -33,13 +35,14 @@ class SkinApiClient {
 
   /// POST /predict
   Future<({String sessionId, String? userMessage, String response})> analyze({
-    required File imageFile,
+    required XFile imageFile,
     String? message,
   }) async {
+    final imageBytes = await imageFile.readAsBytes();
     final form = FormData.fromMap({
-      "image": await MultipartFile.fromFile(
-        imageFile.path,
-        filename: imageFile.uri.pathSegments.last,
+      "image": MultipartFile.fromBytes(
+        imageBytes,
+        filename: imageFile.name.isNotEmpty ? imageFile.name : 'image.jpg',
       ),
       if (message != null && message.trim().isNotEmpty) "message": message,
     });
