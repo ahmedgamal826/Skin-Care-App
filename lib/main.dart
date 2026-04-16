@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
 import 'core/Services/App/app.service.dart';
 import 'core/Services/Auth/auth.service.dart';
 import 'core/Services/Auth/src/Providers/auth_provider.dart';

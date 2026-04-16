@@ -27,7 +27,7 @@
   "password_hint": "Password",
   "forgot_password": "Forgot Password?",
   "login": "Login",
-  "already_have_account": "Already have an account? ",
+  "already_have_account": "Don't have an account? ",
   "sign_up_link": "Sign Up",
   "invalid_email_or_password": "Invalid email or password",
   "sign_in_failed": "Sign in failed",

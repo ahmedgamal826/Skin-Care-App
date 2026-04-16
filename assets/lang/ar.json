@@ -25,7 +25,7 @@
   "password_hint": "كلمة المرور",
   "forgot_password": "نسيت كلمة المرور؟",
   "login": "تسجيل الدخول",
-  "already_have_account": "لديك حساب بالفعل؟ ",
+  "already_have_account": "ليس لديك حساب؟ ",
   "sign_up_link": "إنشاء حساب",
   "invalid_email_or_password": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
   "sign_in_failed": "فشل تسجيل الدخول",
